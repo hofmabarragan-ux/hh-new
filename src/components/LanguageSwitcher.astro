@@ -1,0 +1,23 @@
+---
+const { lang } = Astro.props;
+
+const languages = [
+  { code: "da", label: "DA" },
+  { code: "en", label: "EN" },
+  { code: "es", label: "ES" }
+];
+
+const currentPath = Astro.url.pathname.replace(/^\/(da|en|es)/, "");
+---
+
+<nav>
+  {languages.map((l) => (
+    <a
+      href={`/${l.code}${currentPath}`}
+      aria-current={l.code === lang ? "true" : undefined}
+      style={l.code === lang ? "font-weight: bold;" : ""}
+    >
+      {l.label}
+    </a>
+  ))}
+</nav>

@@ -1,0 +1,31 @@
+---
+import Layout from "../../../layouts/BaseLayout.astro";
+import { i18n } from "../../../content/i18n";
+
+const { lang } = Astro.params;
+const content = i18n[lang];
+
+if (!content) {
+  throw new Error(`Idioma no soportado: ${lang}`);
+}
+
+const projects = content.projects?.items ?? [];
+---
+
+<Layout lang={lang} seo={content.projects?.hero}>
+  <h1>{content.projects.hero.title}</h1>
+  <p>{content.projects.hero.subtitle}</p>
+
+  {projects.map((project) => (
+    <article>
+      <h3>{project.title}</h3>
+      <p>{project.location}</p>
+      <p>{project.text}</p>
+
+      <a href={`/${lang}/projects/${project.title.toLowerCase()}`}>
+        Ver proyecto
+      </a>
+    </article>
+  ))}
+</Layout>
+

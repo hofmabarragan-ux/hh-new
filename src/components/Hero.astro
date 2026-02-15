@@ -1,0 +1,50 @@
+---
+interface CTA {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  primaryCTA?: CTA;
+  secondaryCTA?: CTA;
+}
+
+const { title, subtitle, primaryCTA, secondaryCTA } =
+  Astro.props as Props;
+---
+
+<section class="hero">
+  <h1>{title}</h1>
+
+  {subtitle && <p>{subtitle}</p>}
+
+  <div class="hero-ctas">
+    {primaryCTA && (
+      <a href={primaryCTA.href} class="cta primary">
+        {primaryCTA.label}
+      </a>
+    )}
+
+    {secondaryCTA && (
+      <a href={secondaryCTA.href} class="cta secondary">
+        {secondaryCTA.label}
+      </a>
+    )}
+  </div>
+</section>
+
+<style>
+.hero {
+  padding: 4rem 2rem;
+}
+.hero-ctas {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.primary {
+  font-weight: bold;
+}
+</style>

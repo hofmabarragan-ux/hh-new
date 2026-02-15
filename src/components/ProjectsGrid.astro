@@ -1,0 +1,27 @@
+---
+interface Project {
+  title: string;
+  location: string;
+  text: string;
+  href: string;
+}
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props as Props;
+---
+
+<section class="projects-grid">
+  <div class="grid">
+    {projects.map((p) => (
+      <article class="project-card">
+        <h3>{p.title}</h3>
+        <p class="location">{p.location}</p>
+        <p>{p.text}</p>
+        <a href={p.href} class="project-link">View project →</a>
+      </article>
+    ))}
+  </div>
+</section>

@@ -1,0 +1,19 @@
+---
+const { title, text, placeholder, button } = Astro.props;
+---
+
+<section>
+  <h2>{title}</h2>
+  <p>{text}</p>
+
+  <form>
+    <input
+      type="email"
+      placeholder={placeholder}
+      required
+    />
+    <button type="submit">
+      {button}
+    </button>
+  </form>
+</section>

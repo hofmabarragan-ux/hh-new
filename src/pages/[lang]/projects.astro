@@ -1,0 +1,18 @@
+---
+import Layout from "../../layouts/BaseLayout.astro";
+import ProjectsHero from "../../components/ProjectsHero.astro";
+import ProjectsGrid from "../../components/ProjectsGrid.astro";
+import { getContent } from "../../content/i18n";
+
+const lang = "da";
+const pageContent = getContent(lang);
+---
+
+<Layout lang={lang} seo={pageContent.seo?.projects}>
+  <ProjectsHero
+    title={pageContent.projects.hero.title}
+    subtitle={pageContent.projects.hero.subtitle}
+  />
+
+  <ProjectsGrid projects={pageContent.projects.items} />
+</Layout>

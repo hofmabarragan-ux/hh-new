@@ -1,0 +1,44 @@
+---
+import Layout from "../../../layouts/BaseLayout.astro";
+import { i18n, languages } from "../../../content/i18n";
+
+export async function getStaticPaths() {
+  return languages.flatMap((lang) =>
+    Object.keys(i18n[lang].projectsDetail).map((slug) => ({
+      params: { lang, slug },
+    }))
+  );
+}
+
+const { lang, slug } = Astro.params;
+const project = i18n[lang]?.projectsDetail?.[slug];
+
+if (!project) {
+  throw new Error(`Proyecto no encontrado: ${lang}/${slug}`);
+}
+---
+
+<Layout lang={lang} seo={project.seo}>
+  <section>
+    <h1>{project.hero.title}</h1>
+    <p>{project.hero.subtitle}</p>
+    <strong>{project.hero.location}</strong>
+  </section>
+
+  <section>
+    <p>{project.overview.description}</p>
+
+    <ul>
+      {project.overview.highlights.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section>
+    <h3>{project.cta.title}</h3>
+    <a href={project.cta.button.href}>
+      {project.cta.button.label}
+    </a>
+  </section>
+</Layout>

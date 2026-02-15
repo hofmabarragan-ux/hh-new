@@ -1,0 +1,329 @@
+/* ===================================== */
+/* FONT FACE - OUTFIT */
+/* ===================================== */
+
+@font-face {
+    font-family: "Outfit";
+    src: url("/fonts/outfit/Outfit-Regular.woff2") format("woff2"),
+         url("/fonts/outfit/Outfit-Regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: "Outfit";
+    src: url("/fonts/outfit/Outfit-Medium.woff2") format("woff2"),
+         url("/fonts/outfit/Outfit-Medium.woff") format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: "Outfit";
+    src: url("/fonts/outfit/Outfit-SemiBold.woff2") format("woff2"),
+         url("/fonts/outfit/Outfit-SemiBold.woff") format("woff");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: "Outfit";
+    src: url("/fonts/outfit/Outfit-Bold.woff2") format("woff2"),
+         url("/fonts/outfit/Outfit-Bold.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  /* ===================================== */
+  /* FONT FACE - SATOSHI */
+  /* ===================================== */
+  
+  @font-face {
+    font-family: "Satoshi";
+    src: url("/fonts/satoshi/Satoshi-Regular.woff2") format("woff2"),
+         url("/fonts/satoshi/Satoshi-Regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: "Satoshi";
+    src: url("/fonts/satoshi/Satoshi-Medium.woff2") format("woff2"),
+         url("/fonts/satoshi/Satoshi-Medium.woff") format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: "Satoshi";
+    src: url("/fonts/satoshi/Satoshi-Bold.woff2") format("woff2"),
+         url("/fonts/satoshi/Satoshi-Bold.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  /* ===================================== */
+  /* DESIGN SYSTEM */
+  /* ===================================== */
+  
+  :root {
+    --black: #000000;
+    --blue-deep: #0e2050;
+    --blue-mid: #2581c4;
+    --sand: #d7b78f;
+    --gray: #878787;
+    --white: #ffffff;
+  
+    --container: 1200px;
+  }
+  
+  /* ===================================== */
+  /* RESET */
+  /* ===================================== */
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    margin: 0;
+    font-family: "Satoshi", sans-serif;
+    color: var(--black);
+    background: var(--white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* ===================================== */
+  /* CONTAINER */
+  /* ===================================== */
+  
+  .container {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  /* ===================================== */
+  /* TYPOGRAPHY */
+  /* ===================================== */
+  
+  h1, h2, h3, h4 {
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.02em;
+    color: var(--black);
+  }
+  
+  h1 {
+    font-size: 3.2rem;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+  }
+  
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+  }
+  
+  p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--gray);
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+    transition: 0.2s ease;
+  }
+  
+  a:hover {
+    opacity: 0.8;
+  }
+  
+  /* ===================================== */
+  /* SECTIONS */
+  /* ===================================== */
+  
+  section {
+    padding: 6rem 0;
+  }
+  
+  /* ===================================== */
+  /* HEADER */
+  /* ===================================== */
+  
+  header {
+    border-bottom: 1px solid #eee;
+    background: var(--white);
+  }
+  
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    max-width: var(--container);
+    margin: 0 auto;
+    gap: 1.5rem;
+  }
+  
+  .logo a {
+    font-family: "Outfit", sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--blue-deep);
+  }
+  
+  .lang-switch a {
+    font-size: 0.85rem;
+    color: var(--gray);
+  }
+  
+  .lang-switch .active {
+    color: var(--black);
+    font-weight: 600;
+  }
+  
+  .main-menu {
+    border-top: 1px solid #f2f2f2;
+    padding: 1rem 2rem;
+    max-width: var(--container);
+    margin: 0 auto;
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .main-menu a {
+    font-family: "Satoshi", sans-serif;
+    font-weight: 500;
+    color: var(--blue-deep);
+  }
+  
+  /* ===================================== */
+  /* BUTTONS */
+  /* ===================================== */
+  
+  .cta,
+  .button-primary {
+    padding: 0.75rem 1.6rem;
+    background: var(--blue-deep);
+    color: var(--white);
+    font-family: "Satoshi", sans-serif;
+    font-weight: 500;
+    display: inline-block;
+    transition: 0.3s ease;
+  }
+  
+  .cta:hover,
+  .button-primary:hover {
+    background: var(--blue-mid);
+  }
+  
+  .button-secondary {
+    padding: 0.75rem 1.6rem;
+    border: 1px solid var(--black);
+    font-family: "Satoshi", sans-serif;
+    font-weight: 500;
+    display: inline-block;
+    transition: 0.3s ease;
+  }
+  
+  .button-secondary:hover {
+    background: var(--black);
+    color: var(--white);
+  }
+  
+  /* ===================================== */
+  /* HERO */
+  /* ===================================== */
+  
+  .home-hero {
+    padding: 6rem 0;
+  }
+  
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .hero-actions {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+  
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  /* ===================================== */
+  /* FOOTER */
+  /* ===================================== */
+  
+  .footer {
+    margin-top: 6rem;
+    padding: 3rem 2rem;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+  }
+  
+  .footer-social,
+  .footer-contact {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .footer a {
+    color: var(--blue-deep);
+  }
+  
+  /* ===================================== */
+  /* RESPONSIVE */
+  /* ===================================== */
+  
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    h1 {
+      font-size: 2.4rem;
+    }
+  
+    section {
+      padding: 4rem 0;
+    }
+  }
+  

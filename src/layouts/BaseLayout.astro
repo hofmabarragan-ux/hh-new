@@ -1,0 +1,147 @@
+---
+import "../styles/global.css";
+
+const { lang = "da", seo } = Astro.props;
+
+/* ORDEN DE IDIOMAS */
+const languages = ["da", "en", "es"];
+
+/* LINKS */
+const calendlyUrl = "https://calendly.com/hofmahomes";
+const email = "mailto:hofmahomes@gmail.com";
+const phone = "tel:+4500000000"; // actualizar cuando tengas número real
+
+/* REDES */
+const social = {
+  facebook: "https://facebook.com/",
+  instagram: "https://instagram.com/",
+  tiktok: "https://tiktok.com/",
+  youtube: "https://youtube.com/",
+};
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{seo?.title}</title>
+    <meta name="description" content={seo?.description} />
+
+    {seo?.canonical && <link rel="canonical" href={seo.canonical} />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={seo?.og?.title || seo?.title} />
+    <meta property="og:description" content={seo?.og?.description || seo?.description} />
+    <meta property="og:image" content={seo?.og?.image} />
+    <meta property="og:locale" content={seo?.og?.locale} />
+
+    <!-- Alternate languages -->
+    <link rel="alternate" hrefLang="da" href="https://hofmahomes.com/da" />
+    <link rel="alternate" hrefLang="en" href="https://hofmahomes.com/en" />
+    <link rel="alternate" hrefLang="es" href="https://hofmahomes.com/es" />
+    <link rel="alternate" hrefLang="x-default" href="https://hofmahomes.com/da" />
+  </head>
+
+  <body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header>
+
+      <!-- TOP BAR -->
+      <div class="container header-top">
+
+        <div class="logo">
+          <a href={`/${lang}`}>HOFMA Homes</a>
+        </div>
+
+        <div class="header-right">
+
+          <!-- Language Switcher -->
+          <div class="lang-switch">
+            {languages.map((l, index) => (
+              <>
+                <a href={`/${l}`} class={l === lang ? "active" : ""}>
+                  {l.toUpperCase()}
+                </a>
+                {index < languages.length - 1 && <span> / </span>}
+              </>
+            ))}
+          </div>
+
+          <!-- Quick contact -->
+          <div class="quick-contact">
+            <a href={email}>✉</a>
+            <a href={phone}>☎</a>
+          </div>
+
+          <!-- Social -->
+          <div class="social">
+            <a href={social.facebook} target="_blank">FB</a>
+            <a href={social.instagram} target="_blank">IG</a>
+            <a href={social.tiktok} target="_blank">TT</a>
+            <a href={social.youtube} target="_blank">YT</a>
+          </div>
+
+          <!-- CTA -->
+          <a href={calendlyUrl} class="button-primary">
+            Book a Call
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- MAIN MENU -->
+      <div class="container header-menu">
+        <nav>
+          <a href={`/${lang}/services`}>Services</a>
+          <a href={`/${lang}/investment`}>Investment</a>
+          <a href={`/${lang}/projects`}>Projects</a>
+          <a href={`/${lang}/blog`}>Blog</a>
+          <a href={`/${lang}/about`}>About</a>
+        </nav>
+      </div>
+
+    </header>
+
+    <!-- ================= MAIN ================= -->
+
+    <main>
+      <slot />
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+      <div class="container footer-inner">
+
+        <div class="footer-brand">
+          <a href={`/${lang}`}>HOFMA Homes</a>
+        </div>
+
+        <div class="footer-social">
+          <a href={social.facebook} target="_blank">FB</a>
+          <a href={social.instagram} target="_blank">IG</a>
+          <a href={social.tiktok} target="_blank">TT</a>
+          <a href={social.youtube} target="_blank">YT</a>
+        </div>
+
+        <div class="footer-contact">
+          <a href={email}>Email</a>
+          <a href={phone}>Call</a>
+          <a href={calendlyUrl}>Book a Call</a>
+        </div>
+
+        <div class="footer-copy">
+          © {new Date().getFullYear()} HOFMA Homes
+        </div>
+
+      </div>
+    </footer>
+
+  </body>
+</html>

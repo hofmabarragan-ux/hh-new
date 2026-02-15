@@ -1,0 +1,104 @@
+---
+import Layout from "../../layouts/BaseLayout.astro";
+import Newsletter from "../../components/Newsletter.astro";
+import ContactForm from "../../components/ContactForm.astro";
+import { i18n, languages } from "../../content/i18n";
+
+/* REQUIRED for dynamic route */
+export async function getStaticPaths() {
+  return languages.map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params;
+const content = i18n[lang];
+
+if (!content) {
+  throw new Error(`Idioma no soportado: ${lang}`);
+}
+---
+
+<Layout lang={lang} seo={content.seo}>
+
+  <!-- WHY -->
+  <section class="why">
+    <div class="container">
+      <h1>{content.why.title}</h1>
+
+      <div class="why-grid">
+        {content.why.items.map((item) => (
+          <div class="why-card">
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- FEATURED PROJECTS -->
+  <section class="featured">
+    <div class="container">
+      <h2>{content.featuredProjects.title}</h2>
+
+      <div class="projects-grid">
+        {content.featuredProjects.items.map((project) => (
+          <article class="project-card">
+            <div class="project-content">
+              <h3>{project.title}</h3>
+              <p class="project-location">{project.location}</p>
+              <p>{project.text}</p>
+
+              <a 
+                href={`/${lang}/projects/${project.slug}`} 
+                class="project-link"
+              >
+                {content.ctas.viewProject.label}
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CONTACT -->
+  <section class="contact-cta">
+    <div class="container">
+      <h2>{content.contact?.title ?? "Contact"}</h2>
+      <p>{content.contact?.text}</p>
+
+      <a 
+        href={content.ctas.primary.href} 
+        class="cta"
+      >
+        {content.ctas.primary.label}
+      </a>
+    </div>
+  </section>
+
+
+  <!-- NEWSLETTER -->
+  <section>
+    <div class="container">
+      <Newsletter {...content.newsletter} />
+    </div>
+  </section>
+
+
+  <!-- CONTACT FORM -->
+  <section>
+    <div class="container">
+      <ContactForm
+        title={content.contactForm.title}
+        text={content.contactForm.text}
+        button={content.contactForm.button}
+      />
+    </div>
+  </section>
+
+</Layout>
+

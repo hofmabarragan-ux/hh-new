@@ -1,0 +1,18 @@
+---
+interface Props {
+  description: string;
+  highlights: string[];
+}
+
+const { description, highlights } = Astro.props as Props;
+---
+
+<section class="project-overview">
+  <p>{description}</p>
+
+  <ul>
+    {highlights.map((item) => (
+      <li>{item}</li>
+    ))}
+  </ul>
+</section>

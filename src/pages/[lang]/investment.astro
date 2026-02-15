@@ -1,0 +1,42 @@
+---
+import Layout from "../../layouts/BaseLayout.astro";
+import ContactForm from "../../components/ContactForm.astro";
+import { i18n, languages } from "../../content/i18n";
+
+/* ✅ OBLIGATORIO para rutas dinámicas */
+export async function getStaticPaths() {
+  return languages.map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params;
+const content = i18n[lang];
+
+if (!content) {
+  throw new Error(`Idioma no soportado: ${lang}`);
+}
+---
+
+<Layout lang={lang} seo={content.seo}>
+  <section>
+    <h1>{content.ctas.primary.label}</h1>
+
+    <p>
+      {lang === "es" && "Cuéntanos tus objetivos y diseñamos una estrategia de inversión personalizada."}
+      {lang === "en" && "Tell us about your goals and we will design a personalized investment strategy."}
+      {lang === "da" && "Fortæl os om dine mål, så designer vi en personlig investeringsstrategi."}
+    </p>
+
+    <a href={content.ctas.primary.href}>
+      {content.ctas.primary.label}
+    </a>
+  </section>
+
+  <ContactForm
+  title={content.contactForm.title}
+  text={content.contactForm.text}
+  button={content.contactForm.button}
+/>
+
+</Layout>

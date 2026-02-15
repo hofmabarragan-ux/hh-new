@@ -1,0 +1,32 @@
+---
+import CTA from "./CTA.astro";
+
+interface CTAItem {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  text: string;
+  ctas: {
+    call: CTAItem;
+    whatsapp: CTAItem;
+    email: CTAItem;
+  };
+}
+
+const { title, text, ctas } = Astro.props as Props;
+---
+
+<section class="contact">
+  <h2>{title}</h2>
+  <p>{text}</p>
+
+  <div class="contact-ctas">
+    <CTA {...ctas.call} />
+    <CTA {...ctas.whatsapp} />
+    <CTA {...ctas.email} />
+  </div>
+</section>
+

@@ -1,0 +1,18 @@
+---
+import CTA from "./CTA.astro";
+
+interface Props {
+  title: string;
+  cta: {
+    label: string;
+    href: string;
+  };
+}
+
+const { title, cta } = Astro.props as Props;
+---
+
+<section class="project-cta">
+  <h2>{title}</h2>
+  <CTA label={cta.label} href={cta.href} />
+</section>

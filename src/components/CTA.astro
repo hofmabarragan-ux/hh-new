@@ -1,0 +1,13 @@
+---
+interface Props {
+  label: string;
+  href: string;
+}
+
+const { label, href } = Astro.props as Props;
+---
+
+<a class="cta" href={href} target="_blank" rel="noopener">
+  {label}
+</a>
+
