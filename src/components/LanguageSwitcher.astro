@@ -1,23 +1,17 @@
 ---
-const { lang } = Astro.props;
+import type { Lang } from "../lib/i18n";
 
-const languages = [
-  { code: "da", label: "DA" },
-  { code: "en", label: "EN" },
-  { code: "es", label: "ES" }
-];
+const languages: Lang[] = ["es", "en", "da"];
 
-const currentPath = Astro.url.pathname.replace(/^\/(da|en|es)/, "");
+const currentPath = Astro.url.pathname;
 ---
 
-<nav>
-  {languages.map((l) => (
-    <a
-      href={`/${l.code}${currentPath}`}
-      aria-current={l.code === lang ? "true" : undefined}
-      style={l.code === lang ? "font-weight: bold;" : ""}
-    >
-      {l.label}
-    </a>
-  ))}
-</nav>
+<div class="language-switcher">
+  {languages.map((lang) => {
+    const newPath = currentPath.replace(/^\/(es|en|da)/, `/${lang}`);
+    return (
+      <a href={newPath}>{lang.toUpperCase()}</a>
+    );
+  })}
+</div>
+

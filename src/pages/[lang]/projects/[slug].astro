@@ -1,17 +1,37 @@
 ---
 import Layout from "../../../layouts/BaseLayout.astro";
-import { i18n, languages } from "../../../content/i18n";
+import { languages, getContent, type Lang } from "../../../lib/i18n";
 
+/* REQUIRED for dynamic route */
 export async function getStaticPaths() {
-  return languages.flatMap((lang) =>
-    Object.keys(i18n[lang].projectsDetail).map((slug) => ({
-      params: { lang, slug },
-    }))
-  );
+  return languages.flatMap((lang) => {
+    const content = getContent(lang) as any;
+    if (!content) return [];
+
+    // Fuente principal: projects.items (coherente con /projects)
+    const list = content.projects?.items ?? content.featuredProjects?.items ?? [];
+
+    return list
+      .filter((p: any) => p?.slug) // requiere slug para rutas estables
+      .map((project: any) => ({
+        params: {
+          lang,
+          slug: project.slug,
+        },
+      }));
+  });
 }
 
-const { lang, slug } = Astro.params;
-const project = i18n[lang]?.projectsDetail?.[slug];
+const { lang, slug } = Astro.params as { lang: Lang; slug: string };
+const content = getContent(lang) as any;
+
+if (!content) {
+  throw new Error(`Idioma no soportado: ${lang}`);
+}
+
+// Busca primero en projects.items; fallback a featuredProjects.items
+const list = content.projects?.items ?? content.featuredProjects?.items ?? [];
+const project = list.find((p: any) => p.slug === slug);
 
 if (!project) {
   throw new Error(`Proyecto no encontrado: ${lang}/${slug}`);
@@ -20,25 +40,8 @@ if (!project) {
 
 <Layout lang={lang} seo={project.seo}>
   <section>
-    <h1>{project.hero.title}</h1>
-    <p>{project.hero.subtitle}</p>
-    <strong>{project.hero.location}</strong>
-  </section>
-
-  <section>
-    <p>{project.overview.description}</p>
-
-    <ul>
-      {project.overview.highlights.map((item) => (
-        <li>{item}</li>
-      ))}
-    </ul>
-  </section>
-
-  <section>
-    <h3>{project.cta.title}</h3>
-    <a href={project.cta.button.href}>
-      {project.cta.button.label}
-    </a>
+    <h1>{project.title}</h1>
+    <p>{project.location}</p>
+    <p>{project.text}</p>
   </section>
 </Layout>

@@ -1,31 +1,91 @@
 ---
 import Layout from "../../../layouts/BaseLayout.astro";
-import { i18n } from "../../../content/i18n";
+import { languages, getContent, type Lang } from "../../../lib/i18n";
 
-const { lang } = Astro.params;
-const content = i18n[lang];
+/* REQUIRED for dynamic route */
+export async function getStaticPaths() {
+  return languages.map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
 
 if (!content) {
   throw new Error(`Idioma no soportado: ${lang}`);
 }
 
-const projects = content.projects?.items ?? [];
+/**
+ * Hero/SEO robustos:
+ * - Si existe content.projects.hero => usa eso
+ * - Si no, usa featuredProjects (si existe)
+ * - Si no, usa content.seo (fallback final)
+ */
+const hero =
+  content.projects?.hero ??
+  (content.projects
+    ? content.projects
+    : null) ??
+  (content.featuredProjects?.hero ?? null) ??
+  (content.featuredProjects ?? null) ??
+  null;
+
+const seoData =
+  content.projects?.hero ??
+  content.featuredProjects?.hero ??
+  content.projects ??
+  content.featuredProjects ??
+  content.seo;
+
+/* Títulos fallback */
+const heroTitle =
+  hero?.title ??
+  content.featuredProjects?.title ??
+  (lang === "es" ? "Proyectos" : lang === "da" ? "Projekter" : "Projects");
+
+const heroSubtitle =
+  hero?.subtitle ??
+  content.featuredProjects?.subtitle ??
+  "";
+
+/* Lista de proyectos: prioriza content.projects.items */
+const projectsList =
+  content.projects?.items ??
+  content.featuredProjects?.items ??
+  [];
+
+/* CTA traducido */
+const viewProjectLabel =
+  content.ctas?.viewProject?.label ??
+  (lang === "es" ? "Ver proyecto" : lang === "da" ? "Se projekt" : "View project");
+
+/* Slug fallback */
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 ---
 
-<Layout lang={lang} seo={content.projects?.hero}>
-  <h1>{content.projects.hero.title}</h1>
-  <p>{content.projects.hero.subtitle}</p>
+<Layout lang={lang} seo={seoData}>
+  <h1>{heroTitle}</h1>
+  {heroSubtitle && <p>{heroSubtitle}</p>}
 
-  {projects.map((project) => (
-    <article>
-      <h3>{project.title}</h3>
-      <p>{project.location}</p>
-      <p>{project.text}</p>
+  {projectsList.map((project) => {
+    const slug = project.slug ?? toSlug(project.title ?? "project");
+    return (
+      <article>
+        <h3>{project.title}</h3>
+        <p>{project.location}</p>
+        <p>{project.text}</p>
 
-      <a href={`/${lang}/projects/${project.title.toLowerCase()}`}>
-        Ver proyecto
-      </a>
-    </article>
-  ))}
+        <a href={`/${lang}/projects/${slug}`}>
+          {viewProjectLabel}
+        </a>
+      </article>
+    );
+  })}
 </Layout>
-

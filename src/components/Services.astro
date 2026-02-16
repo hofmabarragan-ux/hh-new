@@ -1,36 +1,23 @@
 ---
-const {
-  title,
-  items = []
-} = Astro.props;
+interface Item {
+  title: string;
+  text: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props as Props;
 ---
 
-<section class="services">
-  <h2>{title}</h2>
-
+<section class="services-list">
   <ul>
-    {items.map(item => (
+    {items.map((item) => (
       <li>
-        <strong>{item.title}</strong>
-        {item.description && <p>{item.description}</p>}
+        <h3>{item.title}</h3>
+        <p>{item.text}</p>
       </li>
     ))}
   </ul>
 </section>
-
-<style>
-.services {
-  padding: 4rem 2rem;
-}
-
-.services ul {
-  list-style: none;
-  padding: 0;
-}
-
-.services li {
-  margin-bottom: 1.5rem;
-}
-</style>
-
-

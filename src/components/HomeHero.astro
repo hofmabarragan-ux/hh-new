@@ -1,12 +1,39 @@
 ---
-const { title, subtitle, cta } = Astro.props;
+const {
+  title,
+  subtitle,
+  primaryCtaLabel,
+  primaryCtaHref,
+  secondaryCtaLabel,
+  secondaryCtaHref,
+  imageSrc = "/images/hero.jpg",
+  imageAlt = "Luxury property in Spain"
+} = Astro.props;
 ---
 
-<section>
-  <h1>{title}</h1>
-  <p>{subtitle}</p>
+<section class="home-hero">
+  <div class="container hero-grid">
 
-  <a href={cta.href}>
-    {cta.label}
-  </a>
+    <!-- LEFT COLUMN -->
+    <div class="hero-content">
+      <h1>{title}</h1>
+      <p class="hero-subtitle">{subtitle}</p>
+
+      <div class="hero-actions">
+        <a href={primaryCtaHref} class="button-primary">
+          {primaryCtaLabel}
+        </a>
+
+        <a href={secondaryCtaHref} class="button-secondary">
+          {secondaryCtaLabel}
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="hero-image">
+      <img src={imageSrc} alt={imageAlt} />
+    </div>
+
+  </div>
 </section>

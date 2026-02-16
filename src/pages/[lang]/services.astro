@@ -4,17 +4,17 @@ import ServicesHero from "../../components/ServicesHero.astro";
 import ServicesList from "../../components/ServicesList.astro";
 import CTA from "../../components/CTA.astro";
 import ContactForm from "../../components/ContactForm.astro";
-import { i18n, languages } from "../../content/i18n";
 
-/* OBLIGATORIO para rutas dinámicas */
+import { languages, getContent, type Lang } from "../../lib/i18n";
+
 export async function getStaticPaths() {
   return languages.map((lang) => ({
     params: { lang },
   }));
 }
 
-const { lang } = Astro.params;
-const content = i18n[lang];
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
 
 if (!content) {
   throw new Error(`Idioma no soportado: ${lang}`);
@@ -22,17 +22,13 @@ if (!content) {
 ---
 
 <Layout lang={lang} seo={content.seo}>
-
-  <!-- HERO -->
   <ServicesHero
     title={content.services.hero.title}
     subtitle={content.services.hero.subtitle}
   />
 
-  <!-- LISTA SERVICIOS -->
   <ServicesList items={content.services.list} />
 
-  <!-- CTA BLOQUE CONVERSIÓN -->
   <section>
     <h2>{content.services.contact.title}</h2>
     <p>{content.services.contact.text}</p>
@@ -42,18 +38,10 @@ if (!content) {
       href="https://calendly.com/hofmahomes"
     />
 
-    <CTA
-      label="WhatsApp"
-      href="https://wa.me/34600000000"
-    />
-
-    <CTA
-      label="Email"
-      href="mailto:hofmahomes@gmail.com"
-    />
+    <CTA label={content.services?.contact?.whatsappLabel ?? "WhatsApp"} href="https://wa.me/34600000000" />
+    <CTA label={content.services?.contact?.emailLabel ?? "Email"} href="mailto:hofmahomes@gmail.com" />
   </section>
 
-  <!-- CONTACT FORM (ANCHOR GLOBAL) -->
   <section id="contact-form">
     <ContactForm
       title={content.contactForm.title}
@@ -61,5 +49,4 @@ if (!content) {
       button={content.contactForm.button}
     />
   </section>
-
 </Layout>

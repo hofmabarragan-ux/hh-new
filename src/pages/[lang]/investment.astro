@@ -1,7 +1,8 @@
 ---
 import Layout from "../../layouts/BaseLayout.astro";
 import ContactForm from "../../components/ContactForm.astro";
-import { i18n, languages } from "../../content/i18n";
+
+import { languages, getContent, type Lang } from "../../lib/i18n";
 
 /* ✅ OBLIGATORIO para rutas dinámicas */
 export async function getStaticPaths() {
@@ -10,23 +11,29 @@ export async function getStaticPaths() {
   }));
 }
 
-const { lang } = Astro.params;
-const content = i18n[lang];
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
 
 if (!content) {
   throw new Error(`Idioma no soportado: ${lang}`);
 }
+
+// Texto traducido (fallback local, por si todavía no está en i18n)
+const introTextByLang: Record<Lang, string> = {
+  es: "Cuéntanos tus objetivos y diseñamos una estrategia de inversión personalizada.",
+  en: "Tell us about your goals and we will design a personalized investment strategy.",
+  da: "Fortæl os om dine mål, så designer vi en personlig investeringsstrategi.",
+};
+
+const introText =
+  content.investment?.introText ?? introTextByLang[lang] ?? introTextByLang.es;
 ---
 
 <Layout lang={lang} seo={content.seo}>
   <section>
     <h1>{content.ctas.primary.label}</h1>
 
-    <p>
-      {lang === "es" && "Cuéntanos tus objetivos y diseñamos una estrategia de inversión personalizada."}
-      {lang === "en" && "Tell us about your goals and we will design a personalized investment strategy."}
-      {lang === "da" && "Fortæl os om dine mål, så designer vi en personlig investeringsstrategi."}
-    </p>
+    <p>{introText}</p>
 
     <a href={content.ctas.primary.href}>
       {content.ctas.primary.label}
@@ -34,9 +41,8 @@ if (!content) {
   </section>
 
   <ContactForm
-  title={content.contactForm.title}
-  text={content.contactForm.text}
-  button={content.contactForm.button}
-/>
-
+    title={content.contactForm.title}
+    text={content.contactForm.text}
+    button={content.contactForm.button}
+  />
 </Layout>

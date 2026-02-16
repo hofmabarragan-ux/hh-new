@@ -2,7 +2,8 @@
 import Layout from "../../layouts/BaseLayout.astro";
 import Newsletter from "../../components/Newsletter.astro";
 import ContactForm from "../../components/ContactForm.astro";
-import { i18n, languages } from "../../content/i18n";
+
+import { languages, type Lang, getContent } from "../../lib/i18n";
 
 /* REQUIRED for dynamic route */
 export async function getStaticPaths() {
@@ -11,8 +12,8 @@ export async function getStaticPaths() {
   }));
 }
 
-const { lang } = Astro.params;
-const content = i18n[lang];
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
 
 if (!content) {
   throw new Error(`Idioma no soportado: ${lang}`);
@@ -20,7 +21,6 @@ if (!content) {
 ---
 
 <Layout lang={lang} seo={content.seo}>
-
   <!-- WHY -->
   <section class="why">
     <div class="container">
@@ -37,7 +37,6 @@ if (!content) {
     </div>
   </section>
 
-
   <!-- FEATURED PROJECTS -->
   <section class="featured">
     <div class="container">
@@ -51,10 +50,7 @@ if (!content) {
               <p class="project-location">{project.location}</p>
               <p>{project.text}</p>
 
-              <a 
-                href={`/${lang}/projects/${project.slug}`} 
-                class="project-link"
-              >
+              <a href={`/${lang}/projects/${project.slug}`} class="project-link">
                 {content.ctas.viewProject.label}
               </a>
             </div>
@@ -64,22 +60,17 @@ if (!content) {
     </div>
   </section>
 
-
   <!-- CONTACT -->
   <section class="contact-cta">
     <div class="container">
       <h2>{content.contact?.title ?? "Contact"}</h2>
       <p>{content.contact?.text}</p>
 
-      <a 
-        href={content.ctas.primary.href} 
-        class="cta"
-      >
+      <a href={content.ctas.primary.href} class="cta">
         {content.ctas.primary.label}
       </a>
     </div>
   </section>
-
 
   <!-- NEWSLETTER -->
   <section>
@@ -87,7 +78,6 @@ if (!content) {
       <Newsletter {...content.newsletter} />
     </div>
   </section>
-
 
   <!-- CONTACT FORM -->
   <section>
@@ -99,6 +89,4 @@ if (!content) {
       />
     </div>
   </section>
-
 </Layout>
-

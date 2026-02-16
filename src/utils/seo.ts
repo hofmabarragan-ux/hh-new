@@ -1,4 +1,4 @@
-import type { Lang } from "../content/i18n";
+import type { Lang } from "../lib/i18n";
 
 const SITE_URL = "https://hofmahones.com";
 
