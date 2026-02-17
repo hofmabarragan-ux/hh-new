@@ -1,15 +1,16 @@
 ---
 import "../styles/global.css";
+import LanguageSwitcher from "../components/LanguageSwitcher.astro";
+import type { Lang } from "../lib/i18n";
 
-const { lang = "da", seo } = Astro.props;
+const { lang = "da", seo } = Astro.props as { lang?: Lang; seo?: any };
 
-/* ORDEN DE IDIOMAS */
-const languages = ["da", "en", "es"];
+const siteOrigin = Astro.site?.origin ?? "https://hofmahomes.com";
 
 /* LINKS */
 const calendlyUrl = "https://calendly.com/hofmahomes";
 const email = "mailto:hofmahomes@gmail.com";
-const phone = "tel:+4500000000"; // actualizar cuando tengas número real
+const phone = "tel:+4500000000"; // TODO: actualizar
 
 /* REDES */
 const social = {
@@ -18,6 +19,20 @@ const social = {
   tiktok: "https://tiktok.com/",
   youtube: "https://youtube.com/",
 };
+
+// SEO fallback
+const title = seo?.title ?? "HOFMA Homes";
+const description =
+  seo?.description ?? "Real estate investment in Spain with a Nordic approach.";
+const canonical = seo?.canonical ?? `${siteOrigin}${Astro.url.pathname}`;
+
+const ogTitle = seo?.og?.title ?? title;
+const ogDescription = seo?.og?.description ?? description;
+const ogImage = seo?.og?.image;
+const ogLocale = seo?.og?.locale;
+
+// IMPORTANTE: pasamos la ruta real al switcher
+const currentPath = Astro.url.pathname;
 ---
 
 <!DOCTYPE html>
@@ -26,108 +41,75 @@ const social = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>{seo?.title}</title>
-    <meta name="description" content={seo?.description} />
-
-    {seo?.canonical && <link rel="canonical" href={seo.canonical} />}
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={seo?.og?.title || seo?.title} />
-    <meta property="og:description" content={seo?.og?.description || seo?.description} />
-    <meta property="og:image" content={seo?.og?.image} />
-    <meta property="og:locale" content={seo?.og?.locale} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogLocale && <meta property="og:locale" content={ogLocale} />}
 
-    <!-- Alternate languages -->
-    <link rel="alternate" hrefLang="da" href="https://hofmahomes.com/da" />
-    <link rel="alternate" hrefLang="en" href="https://hofmahomes.com/en" />
-    <link rel="alternate" hrefLang="es" href="https://hofmahomes.com/es" />
-    <link rel="alternate" hrefLang="x-default" href="https://hofmahomes.com/da" />
+    <!-- hreflang (home por idioma; luego lo refinamos por ruta en Fase SEO) -->
+    <link rel="alternate" hrefLang="da" href={`${siteOrigin}/da`} />
+    <link rel="alternate" hrefLang="en" href={`${siteOrigin}/en`} />
+    <link rel="alternate" hrefLang="es" href={`${siteOrigin}/es`} />
+    <link rel="alternate" hrefLang="x-default" href={`${siteOrigin}/da`} />
   </head>
 
   <body>
-
-    <!-- ================= HEADER ================= -->
-
     <header>
-
-      <!-- TOP BAR -->
       <div class="container header-top">
-
         <div class="logo">
           <a href={`/${lang}`}>HOFMA Homes</a>
         </div>
 
         <div class="header-right">
+          <!-- Switcher con ruta actual -->
+          <LanguageSwitcher />
 
-          <!-- Language Switcher -->
-          <div class="lang-switch">
-            {languages.map((l, index) => (
-              <>
-                <a href={`/${l}`} class={l === lang ? "active" : ""}>
-                  {l.toUpperCase()}
-                </a>
-                {index < languages.length - 1 && <span> / </span>}
-              </>
-            ))}
-          </div>
-
-          <!-- Quick contact -->
           <div class="quick-contact">
             <a href={email}>✉</a>
             <a href={phone}>☎</a>
           </div>
 
-          <!-- Social -->
           <div class="social">
-            <a href={social.facebook} target="_blank">FB</a>
-            <a href={social.instagram} target="_blank">IG</a>
-            <a href={social.tiktok} target="_blank">TT</a>
-            <a href={social.youtube} target="_blank">YT</a>
+            <a href={social.facebook} target="_blank" rel="noopener noreferrer">FB</a>
+            <a href={social.instagram} target="_blank" rel="noopener noreferrer">IG</a>
+            <a href={social.tiktok} target="_blank" rel="noopener noreferrer">TT</a>
+            <a href={social.youtube} target="_blank" rel="noopener noreferrer">YT</a>
           </div>
 
-          <!-- CTA -->
-          <a href={calendlyUrl} class="button-primary">
-            Book a Call
-          </a>
-
+          <a href={calendlyUrl} class="button-primary">Book a Call</a>
         </div>
-
       </div>
 
-      <!-- MAIN MENU -->
       <div class="container header-menu">
         <nav>
           <a href={`/${lang}/services`}>Services</a>
           <a href={`/${lang}/investment`}>Investment</a>
           <a href={`/${lang}/projects`}>Projects</a>
-          <a href={`/${lang}/blog`}>Blog</a>
-          <a href={`/${lang}/about`}>About</a>
         </nav>
       </div>
-
     </header>
-
-    <!-- ================= MAIN ================= -->
 
     <main>
       <slot />
     </main>
 
-    <!-- ================= FOOTER ================= -->
-
     <footer>
       <div class="container footer-inner">
-
         <div class="footer-brand">
           <a href={`/${lang}`}>HOFMA Homes</a>
         </div>
 
         <div class="footer-social">
-          <a href={social.facebook} target="_blank">FB</a>
-          <a href={social.instagram} target="_blank">IG</a>
-          <a href={social.tiktok} target="_blank">TT</a>
-          <a href={social.youtube} target="_blank">YT</a>
+          <a href={social.facebook} target="_blank" rel="noopener noreferrer">FB</a>
+          <a href={social.instagram} target="_blank" rel="noopener noreferrer">IG</a>
+          <a href={social.tiktok} target="_blank" rel="noopener noreferrer">TT</a>
+          <a href={social.youtube} target="_blank" rel="noopener noreferrer">YT</a>
         </div>
 
         <div class="footer-contact">
@@ -139,9 +121,7 @@ const social = {
         <div class="footer-copy">
           © {new Date().getFullYear()} HOFMA Homes
         </div>
-
       </div>
     </footer>
-
   </body>
 </html>

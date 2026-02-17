@@ -35,7 +35,8 @@ const project = list.find((p: any) => p.slug === slug);
 
 if (!project) {
   throw new Error(`Proyecto no encontrado: ${lang}/${slug}`);
-}
+} 
+
 ---
 
 <Layout lang={lang} seo={project.seo}>
