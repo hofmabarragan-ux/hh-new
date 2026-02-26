@@ -1,91 +1,257 @@
 ---
 import Layout from "../../../layouts/BaseLayout.astro";
-import { languages, getContent, type Lang } from "../../../lib/i18n";
+import PageHero from "../../../components/PageHero.astro";
+import CTA from "../../../components/CTA.astro";
+import ContactForm from "../../../components/ContactForm.astro";
+
+import { languages, type Lang, getContent } from "../../../lib/i18n";
+import { CONTACT } from "../../../config/site";
 
 /* REQUIRED for dynamic route */
 export async function getStaticPaths() {
-  return languages.map((lang) => ({
-    params: { lang },
-  }));
+  return languages.map((lang) => ({ params: { lang } }));
 }
+
+type CardItem = { title: string; text: string };
 
 const { lang } = Astro.params as { lang: Lang };
 const content = getContent(lang) as any;
 
-if (!content) {
-  throw new Error(`Idioma no soportado: ${lang}`);
-}
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
 
-/**
- * Hero/SEO robustos:
- * - Si existe content.projects.hero => usa eso
- * - Si no, usa featuredProjects (si existe)
- * - Si no, usa content.seo (fallback final)
- */
-const hero =
-  content.projects?.hero ??
-  (content.projects
-    ? content.projects
-    : null) ??
-  (content.featuredProjects?.hero ?? null) ??
-  (content.featuredProjects ?? null) ??
-  null;
-
-const seoData =
-  content.projects?.hero ??
-  content.featuredProjects?.hero ??
-  content.projects ??
-  content.featuredProjects ??
-  content.seo;
-
-/* Títulos fallback */
+/* ---------------- HERO (SIN CTAs fuera de Home) ---------------- */
 const heroTitle =
-  hero?.title ??
-  content.featuredProjects?.title ??
+  content?.projects?.hero?.title ??
   (lang === "es" ? "Proyectos" : lang === "da" ? "Projekter" : "Projects");
 
 const heroSubtitle =
-  hero?.subtitle ??
-  content.featuredProjects?.subtitle ??
-  "";
+  content?.projects?.hero?.subtitle ??
+  (lang === "es"
+    ? "Catálogo de oportunidades y proyectos en España."
+    : lang === "da"
+      ? "Katalog over muligheder og projekter i Spanien."
+      : "A catalogue of opportunities and projects in Spain.");
 
-/* Lista de proyectos: prioriza content.projects.items */
-const projectsList =
-  content.projects?.items ??
-  content.featuredProjects?.items ??
-  [];
+/* ---------------- INTRO ---------------- */
+const introEyebrow =
+  content?.projects?.intro?.eyebrow ??
+  (lang === "es" ? "PROYECTOS" : lang === "da" ? "PROJEKTER" : "PROJECTS");
 
-/* CTA traducido */
+const introTitle =
+  content?.projects?.intro?.title ??
+  (lang === "es" ? "Visión general" : lang === "da" ? "Overblik" : "Overview");
+
+const introSubtitle =
+  content?.projects?.intro?.subtitle ??
+  (lang === "es"
+    ? "Explora oportunidades seleccionadas. Solicita dossier completo o una shortlist según tu perfil."
+    : lang === "da"
+      ? "Udforsk udvalgte muligheder. Bed om fuldt dossier eller en shortlist efter din profil."
+      : "Explore selected opportunities. Request the full dossier or a shortlist based on your profile.");
+
+/* Summary cards (defensivo + tipado) */
+const summaryFallback: CardItem[] = [
+  {
+    title: lang === "es" ? "Selección" : lang === "da" ? "Udvælgelse" : "Selection",
+    text:
+      lang === "es"
+        ? "Oportunidades filtradas por criterio, ubicación y demanda."
+        : lang === "da"
+          ? "Muligheder filtreret efter kriterier, beliggenhed og efterspørgsel."
+          : "Opportunities filtered by criteria, location and demand.",
+  },
+  {
+    title: lang === "es" ? "Dossier" : lang === "da" ? "Dossier" : "Dossier",
+    text:
+      lang === "es"
+        ? "Documentación disponible bajo solicitud."
+        : lang === "da"
+          ? "Dokumentation tilgængelig efter anmodning."
+          : "Documentation available upon request.",
+  },
+  {
+    title: lang === "es" ? "Shortlist" : lang === "da" ? "Shortlist" : "Shortlist",
+    text:
+      lang === "es"
+        ? "Te ayudamos a priorizar según tu perfil."
+        : lang === "da"
+          ? "Vi hjælper dig med at prioritere efter din profil."
+          : "We help you prioritise based on your profile.",
+  },
+];
+
+const summaryRaw = content?.projects?.summary;
+const summary: CardItem[] =
+  Array.isArray(summaryRaw) && summaryRaw.length ? (summaryRaw as CardItem[]) : summaryFallback;
+
+/* ---------------- FEATURED PROJECTS ---------------- */
+const featuredEyebrow =
+  content?.projects?.featured?.eyebrow ??
+  content?.featuredProjects?.eyebrow ??
+  (lang === "es" ? "DESTACADOS" : lang === "da" ? "UDVALGTE" : "FEATURED");
+
+const featuredTitle =
+  content?.projects?.featured?.title ??
+  content?.featuredProjects?.title ??
+  (lang === "es" ? "Proyectos destacados" : lang === "da" ? "Udvalgte projekter" : "Featured projects");
+
+const featuredSubtitle =
+  content?.projects?.featured?.subtitle ??
+  (lang === "es"
+    ? "Catálogo inicial. Cada proyecto puede tener su ficha detallada."
+    : lang === "da"
+      ? "Indledende katalog. Hvert projekt kan have sin egen detaljeside."
+      : "Initial catalogue. Each project can have its own detail page.");
+
+/* Normalize projects source */
+const projects = Array.isArray(content?.projects?.items)
+  ? content.projects.items
+  : Array.isArray(content?.featuredProjects?.items)
+    ? content.featuredProjects.items
+    : [];
+
 const viewProjectLabel =
-  content.ctas?.viewProject?.label ??
+  content?.ctas?.viewProject?.label ??
   (lang === "es" ? "Ver proyecto" : lang === "da" ? "Se projekt" : "View project");
 
-/* Slug fallback */
-const toSlug = (value: string) =>
-  value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+/* ---------------- CONTACT standard ---------------- */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+/* Contact links (defensivo) */
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref =
+  CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+const calendlyTarget = hasCalendly ? "_blank" : undefined;
+const calendlyRel = hasCalendly ? "noopener noreferrer" : undefined;
+
+/* SEO: BaseLayout espera `seo` */
+const seo = {
+  ...(content?.seo ?? {}),
+  title: heroTitle,
+  description: heroSubtitle,
+};
 ---
 
-<Layout lang={lang} seo={seoData}>
-  <h1>{heroTitle}</h1>
-  {heroSubtitle && <p>{heroSubtitle}</p>}
+<Layout lang={lang} seo={seo}>
+  <!-- HERO (SIN CTAs) -->
+  <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
-  {projectsList.map((project) => {
-    const slug = project.slug ?? toSlug(project.title ?? "project");
-    return (
-      <article>
-        <h3>{project.title}</h3>
-        <p>{project.location}</p>
-        <p>{project.text}</p>
+  <main>
+    <!-- PROJECTS (Descripción general) -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{introEyebrow}</p>
+          <h2 class="h2">{introTitle}</h2>
+          {introSubtitle ? <p class="lead">{introSubtitle}</p> : null}
+        </header>
 
-        <a href={`/${lang}/projects/${slug}`}>
-          {viewProjectLabel}
-        </a>
-      </article>
-    );
-  })}
+        <div class="grid-3">
+          {summary.map((item: CardItem) => (
+            <article class="card">
+              <h3 class="h3">{item.title}</h3>
+              <p class="text">{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED PROJECTS -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{featuredEyebrow}</p>
+          <h2 class="h2">{featuredTitle}</h2>
+          {featuredSubtitle ? <p class="lead">{featuredSubtitle}</p> : null}
+        </header>
+
+        {projects.length ? (
+          <div class="grid-3">
+            {projects.map((project: any) => (
+              <article class="card">
+                <div class="project-content">
+                  <h3 class="h3">{project?.title ?? ""}</h3>
+                  {project?.location ? <p class="project-location">{project.location}</p> : null}
+                  {project?.text ? <p class="text">{project.text}</p> : null}
+
+                  {project?.slug ? (
+                    <a href={`/${lang}/projects/${project.slug}`} class="project-link">
+                      {viewProjectLabel}
+                    </a>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="card">
+            <p class="text">
+              {lang === "es"
+                ? "Estamos preparando el catálogo de proyectos."
+                : lang === "da"
+                  ? "Vi er ved at forberede projektkataloget."
+                  : "We are preparing the project catalogue."}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- CONTACT (standard + form, shared across pages) -->
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={content?.global?.cta?.call ?? "Call"} icon="phone" />
+          <CTA
+            href={whatsappHref}
+            variant="icon"
+            label={content?.global?.cta?.whatsapp ?? "WhatsApp"}
+            icon="whatsapp"
+          />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={content?.global?.cta?.bookACall ?? "Book a call"}
+            icon="calendar"
+            target={calendlyTarget}
+            rel={calendlyRel}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
 </Layout>

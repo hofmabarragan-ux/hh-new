@@ -2,22 +2,25 @@ import da from "./da";
 import en from "./en";
 import es from "./es";
 
-export const languages = ["es", "en", "da"] as const;
+/**
+ * Orden importante:
+ * El primer idioma se considera el principal del proyecto.
+ * HOFMA Homes default = danés.
+ */
+export const languages = ["da", "en", "es"] as const;
 export type Lang = (typeof languages)[number];
 
 export function isLang(value: string): value is Lang {
   return (languages as readonly string[]).includes(value);
 }
 
-export const getContent = (lang: Lang) => {
-  switch (lang) {
-    case "da":
-      return da;
-    case "en":
-      return en;
-    case "es":
-      return es;
-    default:
-      return da;
-  }
+/** Map simple (más fácil de mantener que switch) */
+const contentMap: Record<Lang, any> = {
+  da,
+  en,
+  es,
 };
+
+export function getContent(lang: Lang) {
+  return contentMap[lang] ?? da; // fallback seguro
+}

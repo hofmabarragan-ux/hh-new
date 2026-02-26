@@ -8,6 +8,36 @@ const { title, subtitle } = Astro.props as Props;
 ---
 
 <section class="services-hero">
-  <h1>{title}</h1>
-  <p>{subtitle}</p>
+  <div class="container services-hero-inner">
+    <h1>{title}</h1>
+    <p class="services-subtitle">{subtitle}</p>
+  </div>
 </section>
+
+<style>
+  .services-hero {
+    padding: 4.5rem 0 3rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    text-align: center;
+  }
+
+  .services-hero-inner {
+    max-width: 980px;
+  }
+
+  .services-subtitle {
+    max-width: 70ch;
+    margin: 0 auto;
+    color: var(--gray);
+  }
+
+  @media (max-width: 900px) {
+    .services-hero {
+      padding: 3.25rem 0 2.25rem 0;
+      text-align: left;
+    }
+    .services-subtitle {
+      margin: 0;
+    }
+  }
+</style>

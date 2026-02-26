@@ -1,22 +1,128 @@
 ---
-const { title, text, ctas } = Astro.props;
+import { CONTACT } from "../config/site";
+
+interface Props {
+  title: string;
+  text?: string;
+  actions: {
+    call: string;
+    whatsapp: string;
+    bookCall: string;
+  };
+}
+
+const { title, text = "", actions } = Astro.props as Props;
+
+const phoneUrl = CONTACT.phone;
+const whatsappUrl = CONTACT.whatsapp;
+const calendlyUrl = CONTACT.calendly;
+
+const hasPhone = Boolean(phoneUrl);
 ---
 
-<section>
-  <h2>{title}</h2>
-  <p>{text}</p>
+<section class="contact-quick" aria-label="Contact">
+  <div class="container">
+    <div class="contact-quick-inner">
+      <h2>{title}</h2>
+      {text && <p class="contact-quick-text">{text}</p>}
 
-  <ul>
-    <li>
-      <a href={ctas.call.href}>{ctas.call.label}</a>
-    </li>
-    <li>
-      <a href={ctas.whatsapp.href}>{ctas.whatsapp.label}</a>
-    </li>
-    <li>
-      <a href={ctas.email.href}>{ctas.email.label}</a>
-    </li>
-  </ul>
+      <ul class="contact-quick-actions" aria-label="Contact options">
+        {hasPhone && (
+          <li>
+            <a class="contact-quick-btn" href={phoneUrl} aria-label={actions.call}>
+              <span class="contact-quick-ico" aria-hidden="true">TEL</span>
+              <span class="contact-quick-label">{actions.call}</span>
+            </a>
+          </li>
+        )}
+
+        <li>
+          <a
+            class="contact-quick-btn"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={actions.whatsapp}
+          >
+            <span class="contact-quick-ico" aria-hidden="true">WA</span>
+            <span class="contact-quick-label">{actions.whatsapp}</span>
+          </a>
+        </li>
+
+        <li>
+          <a
+            class="contact-quick-btn"
+            href={calendlyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={actions.bookCall}
+          >
+            <span class="contact-quick-ico" aria-hidden="true">CAL</span>
+            <span class="contact-quick-label">{actions.bookCall}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </section>
 
+<style>
+  .contact-quick {
+    padding: 3.5rem 0;
+    background: #f7f6f3;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
 
+  .contact-quick-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .contact-quick-text {
+    max-width: 70ch;
+    margin: 0.75rem auto 1.5rem auto;
+  }
+
+  .contact-quick-actions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.04);
+    white-space: nowrap;
+  }
+
+  .contact-quick-ico {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  .contact-quick-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: rgba(0, 0, 0, 0.85);
+  }
+</style>

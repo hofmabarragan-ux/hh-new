@@ -3,17 +3,34 @@ import { languages, type Lang } from "../lib/i18n";
 
 const DEFAULT_LANG: Lang = "da";
 const supported = languages as readonly string[];
-const supportedPattern = supported.join("|");
+
+const flagSrc = (l: string) => `/images/flags/${l}.svg`;
+const flagLabel = (l: string) =>
+  l === "da" ? "Dansk" : l === "en" ? "English" : "Español";
 ---
 
-<div id="lang-switcher" class="language-switcher" data-default-lang={DEFAULT_LANG} data-supported={supportedPattern}>
-  {supported.map((l, index) => (
-    <>
-      <a href={`/${l}`} data-lang={l}>
-        {l.toUpperCase()}
-      </a>
-      {index < supported.length - 1 && <span> / </span>}
-    </>
+<div
+  id="lang-switcher"
+  class="language-switcher flags-switcher"
+  data-default-lang={DEFAULT_LANG}
+>
+  {supported.map((l) => (
+    <a
+      class="flag-link"
+      href={`/${l}`}
+      data-lang={l}
+      aria-label={flagLabel(l)}
+      lang={l}
+    >
+      <img
+        class="flag"
+        src={flagSrc(l)}
+        alt={flagLabel(l)}
+        width="28"
+        height="20"
+        loading="lazy"
+      />
+    </a>
   ))}
 </div>
 
@@ -22,35 +39,44 @@ const supportedPattern = supported.join("|");
   const root = document.getElementById("lang-switcher");
   if (!root) return;
 
-  const supportedPattern = root.getAttribute("data-supported") || "da|en|es";
   const defaultLang = root.getAttribute("data-default-lang") || "da";
+  const links = Array.from(root.querySelectorAll("a[data-lang]"));
 
-  const links = Array.from(root.querySelectorAll('a[data-lang]'));
-  const supported = links.map(a => a.getAttribute("data-lang")).filter(Boolean);
+  const rawPath = window.location.pathname || "/";
+  const pathname =
+    rawPath !== "/" && rawPath.endsWith("/")
+      ? rawPath.slice(0, -1)
+      : rawPath;
 
-  // Path real del navegador
-  const raw = window.location.pathname || "/";
-  const pathname = (raw !== "/" && raw.endsWith("/")) ? raw.slice(0, -1) : raw;
+  const segments = pathname.split("/").filter(Boolean);
+  const first = segments[0];
 
-  const first = pathname.split("/")[1] || "";
-  const hasPrefix = supported.includes(first);
+  const supported = links
+    .map((a) => a.getAttribute("data-lang"))
+    .filter(Boolean);
 
-  // Resto de ruta sin el /{lang}
-  const rest = hasPrefix
-    ? pathname.replace(new RegExp(`^/(${supportedPattern})(?=/|$)`), "")
+  const hasLangPrefix = supported.includes(first);
+
+  const rest = hasLangPrefix
+    ? pathname.replace(new RegExp(`^/(${supported.join("|")})(?=/|$)`), "")
     : pathname;
 
-  const currentLang = hasPrefix ? first : defaultLang;
+  const currentLang = hasLangPrefix ? first : defaultLang;
 
   links.forEach((a) => {
     const l = a.getAttribute("data-lang");
     if (!l) return;
 
-    const tail = (rest === "/" ? "" : rest); // si rest es "/", es home
+    const tail = rest === "/" ? "" : rest;
     a.setAttribute("href", `/${l}${tail}`);
 
-    if (l === currentLang) a.setAttribute("aria-current", "page");
-    else a.removeAttribute("aria-current");
+    if (l === currentLang) {
+      a.classList.add("active");
+      a.setAttribute("aria-current", "true");
+    } else {
+      a.classList.remove("active");
+      a.removeAttribute("aria-current");
+    }
   });
 })();
 </script>

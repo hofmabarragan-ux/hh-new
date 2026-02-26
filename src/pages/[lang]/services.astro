@@ -1,52 +1,250 @@
 ---
 import Layout from "../../layouts/BaseLayout.astro";
-import ServicesHero from "../../components/ServicesHero.astro";
-import ServicesList from "../../components/ServicesList.astro";
-import CTA from "../../components/CTA.astro";
+import PageHero from "../../components/PageHero.astro";
 import ContactForm from "../../components/ContactForm.astro";
+import CTA from "../../components/CTA.astro";
 
 import { languages, getContent, type Lang } from "../../lib/i18n";
+import { CONTACT } from "../../config/site";
 
 export async function getStaticPaths() {
-  return languages.map((lang) => ({
-    params: { lang },
-  }));
+  return languages.map((lang) => ({ params: { lang } }));
 }
 
 const { lang } = Astro.params as { lang: Lang };
 const content = getContent(lang) as any;
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
 
-if (!content) {
-  throw new Error(`Idioma no soportado: ${lang}`);
-}
+// i18n defensivo
+const t = content?.services ?? {};
+const hero = t?.hero ?? {};
+
+const sections = t?.sections ?? {};
+const servicesSection = sections?.services ?? {};
+const processSection = sections?.process ?? {};
+
+const heroTitle = hero?.title ?? (lang === "es" ? "Servicios" : lang === "da" ? "Services" : "Services");
+
+const heroSubtitle =
+  hero?.subtitle ??
+  (lang === "es"
+    ? "Qué ofrecemos y cómo trabajamos."
+    : lang === "da"
+      ? "Hvad vi tilbyder, og hvordan vi arbejder."
+      : "What we offer and how we work.");
+
+const servicesEyebrow =
+  servicesSection?.eyebrow ??
+  (lang === "es" ? "QUÉ HACEMOS" : lang === "da" ? "HVAD VI TILBYDER" : "WHAT WE OFFER");
+
+const servicesTitle =
+  servicesSection?.title ?? (lang === "es" ? "Servicios" : lang === "da" ? "Services" : "Services");
+
+const servicesSubtitle =
+  servicesSection?.subtitle ??
+  (lang === "es"
+    ? "Un modelo claro y estructurado para inversores."
+    : lang === "da"
+      ? "En klar og struktureret servicemodel til investorer."
+      : "A clear, structured service model designed for investors.");
+
+const cards: Array<{ title: string; text: string }> =
+  Array.isArray(servicesSection?.cards) && servicesSection.cards.length
+    ? servicesSection.cards
+    : [
+        {
+          title: lang === "es" ? "Búsqueda y selección" : lang === "da" ? "Sourcing" : "Sourcing",
+          text:
+            lang === "es"
+              ? "Identificamos oportunidades alineadas con tus objetivos y perfil de riesgo."
+              : lang === "da"
+                ? "Vi identificerer muligheder, der matcher dine mål og din risikoprofil."
+                : "We identify opportunities aligned with your goals and risk profile.",
+        },
+        {
+          title: lang === "es" ? "Estructuración" : lang === "da" ? "Strukturering" : "Deal structuring",
+          text:
+            lang === "es"
+              ? "Definimos términos, retornos y un plan operativo claro."
+              : lang === "da"
+                ? "Vi definerer vilkår, afkast og en klar operationel plan."
+                : "We help define terms, returns, and a clear operational plan.",
+        },
+        {
+          title: lang === "es" ? "Ejecución y seguimiento" : lang === "da" ? "Eksekvering" : "Execution support",
+          text:
+            lang === "es"
+              ? "Coordinamos el proceso y te mantenemos informado con claridad."
+              : lang === "da"
+                ? "Vi koordinerer processen og holder dig opdateret."
+                : "We coordinate stakeholders and keep you updated.",
+        },
+      ];
+
+const processEyebrow =
+  processSection?.eyebrow ?? (lang === "es" ? "PROCESO" : lang === "da" ? "PROCES" : "PROCESS");
+
+const processTitle =
+  processSection?.title ?? (lang === "es" ? "Nuestro proceso" : lang === "da" ? "Vores proces" : "Our process");
+
+const processSubtitle =
+  processSection?.subtitle ??
+  (lang === "es"
+    ? "Un camino simple y transparente, de la primera llamada a la ejecución."
+    : lang === "da"
+      ? "En enkel og transparent vej fra første samtale til eksekvering."
+      : "A simple, transparent path from first call to execution.");
+
+const steps: Array<{ title: string; text: string }> =
+  Array.isArray(processSection?.steps) && processSection.steps.length
+    ? processSection.steps
+    : [
+        {
+          title: lang === "es" ? "Llamada de diagnóstico" : lang === "da" ? "Afklarende samtale" : "Discovery call",
+          text:
+            lang === "es"
+              ? "Entendemos objetivos, presupuesto, plazos y preferencias."
+              : lang === "da"
+                ? "Vi afklarer mål, budget, tidslinje og præferencer."
+                : "We understand objectives, budget, timelines, and preferences.",
+        },
+        {
+          title: lang === "es" ? "Propuesta" : lang === "da" ? "Forslag" : "Proposal",
+          text:
+            lang === "es"
+              ? "Definimos alcance, enfoque y próximos pasos con claridad."
+              : lang === "da"
+                ? "Vi beskriver scope, tilgang og næste skridt med klarhed."
+                : "We outline scope, approach, and next steps with clarity.",
+        },
+        {
+          title: lang === "es" ? "Ejecución" : lang === "da" ? "Eksekvering" : "Execution",
+          text:
+            lang === "es"
+              ? "Coordinamos el flujo de trabajo y te mantenemos informado."
+              : lang === "da"
+                ? "Vi koordinerer workflowet og holder dig opdateret."
+                : "We coordinate the workflow and keep you updated.",
+        },
+      ];
+
+// CONTACT (standard)
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+// Contact form labels
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+// Links (defensivo)
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+// SEO: BaseLayout espera `seo`
+const seo = {
+  ...(content?.seo ?? {}),
+  title: heroTitle,
+  description: heroSubtitle,
+};
 ---
 
-<Layout lang={lang} seo={content.seo}>
-  <ServicesHero
-    title={content.services.hero.title}
-    subtitle={content.services.hero.subtitle}
-  />
+<Layout lang={lang} seo={seo}>
+  <!-- HERO (sin CTAs) -->
+  <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
-  <ServicesList items={content.services.list} />
+  <main>
+    <!-- SERVICES -->
+    <section class="section">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{servicesEyebrow}</p>
+          <h2 class="h2">{servicesTitle}</h2>
+          {servicesSubtitle ? <p class="lead">{servicesSubtitle}</p> : null}
+        </header>
 
-  <section>
-    <h2>{content.services.contact.title}</h2>
-    <p>{content.services.contact.text}</p>
+        <div class="grid-3">
+          {cards.map((card: { title: string; text: string }) => (
+            <article class="card">
+              <h3 class="h3">{card.title}</h3>
+              <p class="text">{card.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
 
-    <CTA
-      label={content.ctas.primary.label}
-      href="https://calendly.com/hofmahomes"
-    />
+    <!-- PROCESS -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{processEyebrow}</p>
+          <h2 class="h2">{processTitle}</h2>
+          {processSubtitle ? <p class="lead">{processSubtitle}</p> : null}
+        </header>
 
-    <CTA label={content.services?.contact?.whatsappLabel ?? "WhatsApp"} href="https://wa.me/34600000000" />
-    <CTA label={content.services?.contact?.emailLabel ?? "Email"} href="mailto:hofmahomes@gmail.com" />
-  </section>
+        <ol class="steps">
+          {steps.map((step: { title: string; text: string }, i: number) => (
+            <li class="steps__item">
+              <div class="steps__index">{String(i + 1).padStart(2, "0")}</div>
+              <div class="steps__content">
+                <h3 class="h3">{step.title}</h3>
+                <p class="text">{step.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
 
-  <section id="contact-form">
-    <ContactForm
-      title={content.contactForm.title}
-      text={content.contactForm.text}
-      button={content.contactForm.button}
-    />
-  </section>
+    <!-- CONTACT -->
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={content?.global?.cta?.call ?? "Call"} icon="phone" />
+          <CTA
+            href={whatsappHref}
+            variant="icon"
+            label={content?.global?.cta?.whatsapp ?? "WhatsApp"}
+            icon="whatsapp"
+          />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={content?.global?.cta?.bookACall ?? "Book a call"}
+            icon="calendar"
+            target={hasCalendly ? "_blank" : undefined}
+            rel={hasCalendly ? "noopener noreferrer" : undefined}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
 </Layout>

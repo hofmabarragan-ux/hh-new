@@ -1,38 +1,130 @@
 ---
 import "../styles/global.css";
-import LanguageSwitcher from "../components/LanguageSwitcher.astro";
-import type { Lang } from "../lib/i18n";
+import { getContent, languages, type Lang } from "../lib/i18n";
+import { SITE, CONTACT } from "../config/site";
+
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 
 const { lang = "da", seo } = Astro.props as { lang?: Lang; seo?: any };
+const content = getContent(lang);
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
 
-const siteOrigin = Astro.site?.origin ?? "https://hofmahomes.com";
+/* origin consistente + normalizado (sin trailing slash) */
+const originRaw = import.meta.env.DEV
+  ? Astro.url.origin
+  : (Astro.site?.origin ?? SITE.origin ?? "https://hofmahomes.com");
 
-/* LINKS */
-const calendlyUrl = "https://calendly.com/hofmahomes";
-const email = "mailto:hofmahomes@gmail.com";
-const phone = "tel:+4500000000"; // TODO: actualizar
+const origin = String(originRaw).replace(/\/+$/, "");
 
-/* REDES */
+/* Helpers: normalizar links (defensivo) */
+const toMailto = (v: string) => {
+  if (!v) return "";
+  if (v.startsWith("mailto:")) return v;
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  return v.includes("@") ? `mailto:${v}` : v;
+};
+
+const toTel = (v: string) => {
+  if (!v) return "";
+  if (v.startsWith("tel:")) return v;
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  return `tel:${v}`;
+};
+
+const toWhatsApp = (v: string) => {
+  if (!v) return "";
+  if (v.startsWith("http://") || v.startsWith("https://")) return v;
+  const digits = v.replace(/\D/g, "");
+  return digits ? `https://wa.me/${digits}` : v;
+};
+
+/* CONTACT (defensivo) */
+const emailUrl = toMailto((CONTACT as any)?.email ?? "");
+const phoneUrl = toTel((CONTACT as any)?.phone ?? "");
+const whatsappUrl = toWhatsApp((CONTACT as any)?.whatsapp ?? "");
+const calendlyUrl = (CONTACT as any)?.calendlyUrl ?? (CONTACT as any)?.calendly ?? "#";
+
+/* REDES (ideal: mover a config más adelante) */
 const social = {
   facebook: "https://facebook.com/",
   instagram: "https://instagram.com/",
   tiktok: "https://tiktok.com/",
   youtube: "https://youtube.com/",
+  linkedin: "https://linkedin.com/",
 };
 
-// SEO fallback
 const title = seo?.title ?? "HOFMA Homes";
-const description =
-  seo?.description ?? "Real estate investment in Spain with a Nordic approach.";
-const canonical = seo?.canonical ?? `${siteOrigin}${Astro.url.pathname}`;
+const description = seo?.description ?? "Real estate investment in Spain with a Nordic approach.";
 
+/* Path sin prefijo de idioma para construir alternates correctos (dinámico) */
+const langsRe = new RegExp(`^/(${languages.join("|")})(?=/|$)`, "i");
+const pathWithoutLang = Astro.url.pathname.replace(langsRe, "");
+
+/* Canonical robusto */
+const canonical = String(seo?.canonical ?? `${origin}${Astro.url.pathname}`).replace(/([^:]\/)\/+/g, "$1");
+
+/* OG */
+const siteName = (SITE as any)?.name ?? "HOFMA Homes";
 const ogTitle = seo?.og?.title ?? title;
 const ogDescription = seo?.og?.description ?? description;
-const ogImage = seo?.og?.image;
+const ogImage = seo?.og?.image ?? `${origin}/images/hero.jpg`;
 const ogLocale = seo?.og?.locale;
 
-// IMPORTANTE: pasamos la ruta real al switcher
-const currentPath = Astro.url.pathname;
+/* hreflang */
+const hreflangs =
+  (seo?.hreflangs as Array<{ lang: string; url: string }> | undefined) ??
+  languages.map((l) => ({ lang: l, url: `${origin}/${l}${pathWithoutLang || ""}` }));
+
+const xDefaultHref = `${origin}/da${pathWithoutLang || ""}`;
+
+/* Active state nav */
+const pathname = Astro.url.pathname;
+const isActive = (path: string) => {
+  const base = `/${lang}${path}`;
+  return pathname === base || pathname.startsWith(`${base}/`);
+};
+
+/* Nav labels fallbacks (defensivo) */
+const navServices =
+  content?.nav?.services ?? (lang === "es" ? "Servicios" : lang === "da" ? "Services" : "Services");
+
+const navInvestment =
+  content?.nav?.investment ?? (lang === "es" ? "Inversión" : lang === "da" ? "Investering" : "Investment");
+
+const navProjects =
+  content?.nav?.projects ?? (lang === "es" ? "Proyectos" : lang === "da" ? "Projekter" : "Projects");
+
+const navAbout = content?.nav?.about ?? (lang === "es" ? "Sobre nosotros" : lang === "da" ? "Om os" : "About");
+const navBlog = content?.nav?.blog ?? "Blog";
+
+const navTerms = content?.nav?.terms ?? (lang === "es" ? "Términos" : lang === "da" ? "Vilkår" : "Terms");
+
+const navCookie =
+  content?.nav?.cookie ??
+  (lang === "es" ? "Cookies y privacidad" : lang === "da" ? "Cookies og privatliv" : "Cookies & privacy");
+
+const navEmail = content?.nav?.email ?? "Email";
+const navCall = content?.nav?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+
+const navBookCall =
+  content?.nav?.bookCall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
+
+/* Footer labels */
+const footerHomeLabel = content?.nav?.home ?? (lang === "es" ? "Inicio" : lang === "da" ? "Hjem" : "Home");
+
+/* Hrefs */
+const homeHref = `/${lang}`;
+const servicesHref = `/${lang}/services`;
+const investmentHref = `/${lang}/investment`;
+const projectsHref = `/${lang}/projects`;
+const aboutHref = `/${lang}/about`;
+const blogHref = `/${lang}/blog`;
+const termsHref = `/${lang}/terms`;
+const cookieHref = `/${lang}/cookie`;
+
+/* Minimal safety: avoid empty phone links */
+const hasPhone = Boolean((CONTACT as any)?.phone);
 ---
 
 <!DOCTYPE html>
@@ -45,83 +137,101 @@ const currentPath = Astro.url.pathname;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
-    <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={ogDescription} />
     {ogImage && <meta property="og:image" content={ogImage} />}
     {ogLocale && <meta property="og:locale" content={ogLocale} />}
 
-    <!-- hreflang (home por idioma; luego lo refinamos por ruta en Fase SEO) -->
-    <link rel="alternate" hrefLang="da" href={`${siteOrigin}/da`} />
-    <link rel="alternate" hrefLang="en" href={`${siteOrigin}/en`} />
-    <link rel="alternate" hrefLang="es" href={`${siteOrigin}/es`} />
-    <link rel="alternate" hrefLang="x-default" href={`${siteOrigin}/da`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={ogDescription} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    {hreflangs.map((alt) => (
+      <link rel="alternate" hreflang={alt.lang} href={alt.url} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={xDefaultHref} />
+
+    <!-- Make in-page anchor offsets more reliable across browsers (esp. mobile) -->
+    <style>
+      html {
+        scroll-padding-top: var(--header-offset, 170px);
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main.main-content {
+        flex: 1;
+      }
+      footer.site-footer {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
   </head>
 
   <body>
-    <header>
-      <div class="container header-top">
-        <div class="logo">
-          <a href={`/${lang}`}>HOFMA Homes</a>
-        </div>
+    <Header
+      lang={lang}
+      homeHref={homeHref}
+      servicesHref={servicesHref}
+      investmentHref={investmentHref}
+      projectsHref={projectsHref}
+      aboutHref={aboutHref}
+      blogHref={blogHref}
+      navServices={navServices}
+      navInvestment={navInvestment}
+      navProjects={navProjects}
+      navAbout={navAbout}
+      navBlog={navBlog}
+      navEmail={navEmail}
+      navCall={navCall}
+      navBookCall={navBookCall}
+      emailUrl={emailUrl}
+      phoneUrl={phoneUrl}
+      whatsappUrl={whatsappUrl}
+      calendlyUrl={calendlyUrl}
+      social={social}
+      hasPhone={hasPhone}
+      isActive={isActive}
+    />
 
-        <div class="header-right">
-          <!-- Switcher con ruta actual -->
-          <LanguageSwitcher />
-
-          <div class="quick-contact">
-            <a href={email}>✉</a>
-            <a href={phone}>☎</a>
-          </div>
-
-          <div class="social">
-            <a href={social.facebook} target="_blank" rel="noopener noreferrer">FB</a>
-            <a href={social.instagram} target="_blank" rel="noopener noreferrer">IG</a>
-            <a href={social.tiktok} target="_blank" rel="noopener noreferrer">TT</a>
-            <a href={social.youtube} target="_blank" rel="noopener noreferrer">YT</a>
-          </div>
-
-          <a href={calendlyUrl} class="button-primary">Book a Call</a>
-        </div>
-      </div>
-
-      <div class="container header-menu">
-        <nav>
-          <a href={`/${lang}/services`}>Services</a>
-          <a href={`/${lang}/investment`}>Investment</a>
-          <a href={`/${lang}/projects`}>Projects</a>
-        </nav>
-      </div>
-    </header>
-
-    <main>
+    <main class="main-content">
       <slot />
     </main>
 
-    <footer>
-      <div class="container footer-inner">
-        <div class="footer-brand">
-          <a href={`/${lang}`}>HOFMA Homes</a>
-        </div>
-
-        <div class="footer-social">
-          <a href={social.facebook} target="_blank" rel="noopener noreferrer">FB</a>
-          <a href={social.instagram} target="_blank" rel="noopener noreferrer">IG</a>
-          <a href={social.tiktok} target="_blank" rel="noopener noreferrer">TT</a>
-          <a href={social.youtube} target="_blank" rel="noopener noreferrer">YT</a>
-        </div>
-
-        <div class="footer-contact">
-          <a href={email}>Email</a>
-          <a href={phone}>Call</a>
-          <a href={calendlyUrl}>Book a Call</a>
-        </div>
-
-        <div class="footer-copy">
-          © {new Date().getFullYear()} HOFMA Homes
-        </div>
-      </div>
-    </footer>
+    <Footer
+      lang={lang}
+      homeHref={homeHref}
+      servicesHref={servicesHref}
+      investmentHref={investmentHref}
+      projectsHref={projectsHref}
+      aboutHref={aboutHref}
+      blogHref={blogHref}
+      termsHref={termsHref}
+      cookieHref={cookieHref}
+      footerHomeLabel={footerHomeLabel}
+      navServices={navServices}
+      navInvestment={navInvestment}
+      navProjects={navProjects}
+      navAbout={navAbout}
+      navBlog={navBlog}
+      navTerms={navTerms}
+      navCookie={navCookie}
+      navEmail={navEmail}
+      navCall={navCall}
+      navBookCall={navBookCall}
+      emailUrl={emailUrl}
+      phoneUrl={phoneUrl}
+      whatsappUrl={whatsappUrl}
+      calendlyUrl={calendlyUrl}
+      social={social}
+      hasPhone={hasPhone}
+    />
   </body>
 </html>

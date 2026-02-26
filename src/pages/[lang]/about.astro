@@ -1,0 +1,304 @@
+---
+import Layout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import CTA from "../../components/CTA.astro";
+import ContactForm from "../../components/ContactForm.astro";
+import FollowUS from "../../components/FollowUS.astro";
+
+import { languages, type Lang, getContent } from "../../lib/i18n";
+import { CONTACT } from "../../config/site";
+
+export async function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+type CardItem = { title: string; text: string };
+type TeamMember = { name: string; role: string };
+
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
+
+/* ---------------- HERO (defensivo) ---------------- */
+const pageTitle =
+  content?.about?.hero?.title ??
+  (lang === "es" ? "Sobre HOFMA Homes" : lang === "da" ? "Om HOFMA Homes" : "About HOFMA Homes");
+
+const pageSubtitle =
+  content?.about?.hero?.subtitle ??
+  (lang === "es"
+    ? "Estrategia, criterio y acompañamiento humano en inversión inmobiliaria en España."
+    : lang === "da"
+      ? "Strategi, kriterier og menneskelig rådgivning i ejendomsinvestering i Spanien."
+      : "Strategy, criteria and human guidance in real estate investment in Spain.");
+
+/* ---------------- WHY ---------------- */
+const whyEyebrow = content?.about?.why?.eyebrow ?? (lang === "es" ? "POR QUÉ" : lang === "da" ? "HVORFOR" : "WHY");
+
+const whyTitle =
+  content?.about?.why?.title ??
+  (lang === "es" ? "Por qué HOFMA Homes" : lang === "da" ? "Hvorfor HOFMA Homes" : "Why HOFMA Homes");
+
+const whySubtitle =
+  content?.about?.why?.subtitle ??
+  (lang === "es"
+    ? "Una forma más clara y estratégica de invertir, sin ruido."
+    : lang === "da"
+      ? "En klarere og mere strategisk måde at investere på — uden støj."
+      : "A clearer, more strategic way to invest — without noise.");
+
+const whyItemsFallback: CardItem[] =
+  lang === "es"
+    ? [
+        { title: "Criterio antes que volumen", text: "Seleccionamos oportunidades con filtros claros y coherentes." },
+        { title: "Proceso con claridad", text: "Decisiones con contexto, prioridades y pasos definidos." },
+        { title: "Relación a largo plazo", text: "Acompañamiento sostenible, basado en confianza." },
+      ]
+    : lang === "da"
+      ? [
+          { title: "Kriterier før volumen", text: "Vi udvælger muligheder med klare og sammenhængende filtre." },
+          { title: "Klar proces", text: "Beslutninger med kontekst, prioriteringer og tydelige trin." },
+          { title: "Langsigtet relation", text: "Bæredygtig sparring baseret på tillid." },
+        ]
+      : [
+          { title: "Criteria over volume", text: "We select opportunities with clear and coherent filters." },
+          { title: "A clear process", text: "Decisions with context, priorities and defined steps." },
+          { title: "Long-term relationship", text: "Sustainable guidance built on trust." },
+        ];
+
+const whyItemsRaw = content?.about?.why?.items;
+const whyItems: CardItem[] =
+  Array.isArray(whyItemsRaw) && whyItemsRaw.length ? (whyItemsRaw as CardItem[]) : whyItemsFallback;
+
+/* ---------------- PHILOSOPHY ---------------- */
+const philosophyEyebrow =
+  content?.about?.philosophy?.eyebrow ??
+  (lang === "es" ? "FILOSOFÍA" : lang === "da" ? "FILOSOFI" : "PHILOSOPHY");
+
+const philosophyTitle =
+  content?.about?.philosophy?.title ??
+  (lang === "es" ? "Nuestra filosofía" : lang === "da" ? "Vores filosofi" : "Our philosophy");
+
+const philosophySubtitle =
+  content?.about?.philosophy?.subtitle ??
+  (lang === "es"
+    ? "Principios simples para decisiones mejores."
+    : lang === "da"
+      ? "Enkle principper til bedre beslutninger."
+      : "Simple principles for better decisions.");
+
+const philosophyItemsFallback: CardItem[] =
+  lang === "es"
+    ? [
+        {
+          title: "Criterio antes que volumen",
+          text: "No trabajamos por cantidad de operaciones, sino por coherencia estratégica.",
+        },
+        {
+          title: "Claridad en el proceso",
+          text: "Cada decisión se toma con contexto, datos y visión de largo plazo.",
+        },
+        {
+          title: "Relaciones a largo plazo",
+          text: "Buscamos construir relaciones sostenibles basadas en confianza.",
+        },
+      ]
+    : lang === "da"
+      ? [
+          { title: "Kriterier før volumen", text: "Vi arbejder ikke med volumen, men med strategisk sammenhæng." },
+          { title: "Klarhed i processen", text: "Hver beslutning tages med kontekst, data og langsigtet perspektiv." },
+          { title: "Langsigtede relationer", text: "Vi opbygger bæredygtige relationer baseret på tillid." },
+        ]
+      : [
+          { title: "Criteria before volume", text: "We don’t optimise for volume, but for strategic coherence." },
+          { title: "Clarity in the process", text: "Every decision is taken with context, data and long-term vision." },
+          { title: "Long-term relationships", text: "We build sustainable relationships based on trust." },
+        ];
+
+const philosophyItemsRaw = content?.about?.philosophy?.items;
+const philosophyItems: CardItem[] =
+  Array.isArray(philosophyItemsRaw) && philosophyItemsRaw.length
+    ? (philosophyItemsRaw as CardItem[])
+    : philosophyItemsFallback;
+
+/* ---------------- TEAM ---------------- */
+const teamEyebrow = content?.about?.team?.eyebrow ?? (lang === "es" ? "EQUIPO" : lang === "da" ? "TEAM" : "TEAM");
+
+const teamTitle = content?.about?.team?.title ?? (lang === "es" ? "El equipo" : lang === "da" ? "Teamet" : "The team");
+
+const teamLead =
+  content?.about?.team?.lead ??
+  (lang === "es"
+    ? "Las personas detrás de HOFMA Homes combinan visión estratégica, marketing y ejecución operativa."
+    : lang === "da"
+      ? "Personerne bag HOFMA Homes kombinerer strategisk vision, marketing og operationel eksekvering."
+      : "The people behind HOFMA Homes combine strategic vision, marketing and operational execution.");
+
+const teamMembersFallback: TeamMember[] = [
+  {
+    name: "Niels",
+    role:
+      lang === "es"
+        ? "Dirección y mercado danés"
+        : lang === "da"
+          ? "Ledelse og det danske marked"
+          : "Leadership & Danish market",
+  },
+  {
+    name: "Co-Founder",
+    role:
+      lang === "es"
+        ? "Estrategia, branding y comunicación"
+        : lang === "da"
+          ? "Strategi, branding og kommunikation"
+          : "Strategy, branding & communication",
+  },
+];
+
+const teamMembersRaw = content?.about?.team?.members;
+const teamMembers: TeamMember[] =
+  Array.isArray(teamMembersRaw) && teamMembersRaw.length ? (teamMembersRaw as TeamMember[]) : teamMembersFallback;
+
+/* ---------------- LINKS (defensivo) ---------------- */
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+const calendlyTarget = hasCalendly ? "_blank" : undefined;
+const calendlyRel = hasCalendly ? "noopener noreferrer" : undefined;
+
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+/* Labels (consistentes) */
+const bookCallLabel =
+  content?.global?.cta?.bookACall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
+const whatsappLabel = content?.global?.cta?.whatsapp ?? "WhatsApp";
+const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+
+/* ---------------- CONTACT standard ---------------- */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+/* SEO override */
+const seo = {
+  ...(content?.seo ?? {}),
+  title: pageTitle,
+  description: pageSubtitle,
+};
+---
+
+<Layout lang={lang} seo={seo}>
+  <PageHero title={pageTitle} subtitle={pageSubtitle} />
+
+  <main>
+    <!-- WHY -->
+    <section class="section">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{whyEyebrow}</p>
+          <h2 class="h2">{whyTitle}</h2>
+          {whySubtitle ? <p class="lead">{whySubtitle}</p> : null}
+        </header>
+
+        <div class="grid-3">
+          {whyItems.map((item) => (
+            <article class="card">
+              <h3 class="h3">{item.title}</h3>
+              <p class="text">{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- PHILOSOPHY -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{philosophyEyebrow}</p>
+          <h2 class="h2">{philosophyTitle}</h2>
+          {philosophySubtitle ? <p class="lead">{philosophySubtitle}</p> : null}
+        </header>
+
+        <div class="grid-3">
+          {philosophyItems.map((item) => (
+            <article class="card">
+              <h3 class="h3">{item.title}</h3>
+              <p class="text">{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{teamEyebrow}</p>
+          <h2 class="h2">{teamTitle}</h2>
+          {teamLead ? <p class="lead">{teamLead}</p> : null}
+        </header>
+
+        <div class="grid-3">
+          {teamMembers.map((member) => (
+            <article class="card team-card">
+              <div class="team-avatar" aria-hidden="true"></div>
+              <h3 class="h3">{member.name}</h3>
+              <p class="text">{member.role}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLLOW US (permitido en About) -->
+    <FollowUS lang={lang} className="follow-online" />
+
+    <!-- CONTACT -->
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
+          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={bookCallLabel}
+            icon="calendar"
+            target={calendlyTarget}
+            rel={calendlyRel}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

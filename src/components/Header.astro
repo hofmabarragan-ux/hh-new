@@ -1,0 +1,238 @@
+---
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import type { Lang } from "../lib/i18n";
+
+type Props = {
+  lang: Lang;
+
+  homeHref: string;
+  servicesHref: string;
+  investmentHref: string;
+  projectsHref: string;
+  aboutHref: string;
+  blogHref: string;
+
+  navServices: string;
+  navInvestment: string;
+  navProjects: string;
+  navAbout: string;
+  navBlog: string;
+
+  navEmail: string;
+  navCall: string;
+  navBookCall: string;
+
+  emailUrl: string;
+  phoneUrl: string;
+  whatsappUrl: string;
+  calendlyUrl: string;
+
+  social: {
+    facebook: string;
+    instagram: string;
+    tiktok: string;
+    youtube: string;
+    linkedin: string;
+  };
+
+  hasPhone: boolean;
+  isActive: (path: string) => boolean;
+};
+
+const {
+  homeHref,
+  servicesHref,
+  investmentHref,
+  projectsHref,
+  aboutHref,
+  blogHref,
+  navServices,
+  navInvestment,
+  navProjects,
+  navAbout,
+  navBlog,
+  navEmail,
+  navCall,
+  navBookCall,
+  emailUrl,
+  phoneUrl,
+  whatsappUrl,
+  calendlyUrl,
+  social,
+  hasPhone,
+  isActive,
+} = Astro.props as Props;
+---
+
+<header class="site-header" data-menu-open="false">
+  <div class="container">
+    <!-- ROW 1 (Desktop): LOGO | Social | Contact | CTA
+         ROW 1 (Mobile):  LOGO | Social | MENU -->
+    <div class="header-top">
+      <div class="logo">
+        <a href={homeHref}>HOFMA Homes</a>
+      </div>
+
+      <div class="header-top-right">
+        <!-- Social (NO RSS) -->
+        <div class="icon-group" aria-label="Social links">
+          <a
+            class="icon-btn"
+            data-ico="facebook"
+            href={social.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+          >
+            FB
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="instagram"
+            href={social.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            IG
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="tiktok"
+            href={social.tiktok}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok"
+          >
+            TT
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="youtube"
+            href={social.youtube}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+          >
+            YT
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="linkedin"
+            href={social.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+          >
+            IN
+          </a>
+        </div>
+
+        <!-- Contact (desktop row 1) -->
+        <div class="icon-group icon-group--contact" aria-label="Contact links">
+          <a class="icon-btn" data-ico="email" href={emailUrl} aria-label={navEmail}>@</a>
+          {hasPhone && <a class="icon-btn" data-ico="phone" href={phoneUrl} aria-label={navCall}>TEL</a>}
+          <a
+            class="icon-btn"
+            data-ico="whatsapp"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+          >
+            WA
+          </a>
+        </div>
+
+        <!-- CTA (desktop row 1) -->
+        <a href={calendlyUrl} class="button-primary header-cta">
+          {navBookCall}
+        </a>
+
+        <!-- Mobile menu toggle (only mobile) -->
+        <button
+          class="icon-btn menu-toggle"
+          type="button"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="mobile-nav"
+        >
+          ☰
+        </button>
+      </div>
+    </div>
+
+    <!-- ROW 2 (Desktop): MENU | FLAGS
+         ROW 2 (Mobile):  Contact | Flags | CTA -->
+    <div class="header-bottom">
+      <div class="header-bottom-bar">
+        <!-- Contact (mobile row 2) -->
+        <div class="icon-group icon-group--contact bottom-contact" aria-label="Contact links">
+          <a class="icon-btn" data-ico="email" href={emailUrl} aria-label={navEmail}>@</a>
+          {hasPhone && <a class="icon-btn" data-ico="phone" href={phoneUrl} aria-label={navCall}>TEL</a>}
+          <a
+            class="icon-btn"
+            data-ico="whatsapp"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+          >
+            WA
+          </a>
+        </div>
+
+        <!-- Desktop nav (ONLY 5 links) -->
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href={servicesHref} class={isActive("/services") ? "nav-active" : ""}>{navServices}</a>
+          <a href={investmentHref} class={isActive("/investment") ? "nav-active" : ""}>{navInvestment}</a>
+          <a href={projectsHref} class={isActive("/projects") ? "nav-active" : ""}>{navProjects}</a>
+          <a href={aboutHref} class={isActive("/about") ? "nav-active" : ""}>{navAbout}</a>
+          <a href={blogHref} class={isActive("/blog") ? "nav-active" : ""}>{navBlog}</a>
+        </nav>
+
+        <!-- Flags -->
+        <div class="flags" aria-label="Language switcher">
+          <LanguageSwitcher />
+        </div>
+
+        <!-- CTA (mobile row 2) -->
+        <a href={calendlyUrl} class="button-primary header-cta bottom-cta">
+          {navBookCall}
+        </a>
+      </div>
+
+      <!-- Mobile dropdown nav (ONLY 5 links) -->
+      <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
+        <a href={servicesHref} class={isActive("/services") ? "nav-active" : ""}>{navServices}</a>
+        <a href={investmentHref} class={isActive("/investment") ? "nav-active" : ""}>{navInvestment}</a>
+        <a href={projectsHref} class={isActive("/projects") ? "nav-active" : ""}>{navProjects}</a>
+        <a href={aboutHref} class={isActive("/about") ? "nav-active" : ""}>{navAbout}</a>
+        <a href={blogHref} class={isActive("/blog") ? "nav-active" : ""}>{navBlog}</a>
+      </nav>
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const header = document.querySelector(".site-header");
+      const btn = document.querySelector(".menu-toggle");
+      const nav = document.getElementById("mobile-nav");
+      if (!header || !btn || !nav) return;
+
+      const setOpen = (open) => {
+        header.setAttribute("data-menu-open", open ? "true" : "false");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      };
+
+      btn.addEventListener("click", () => {
+        const open = header.getAttribute("data-menu-open") === "true";
+        setOpen(!open);
+      });
+
+      nav.querySelectorAll("a").forEach((a) => {
+        a.addEventListener("click", () => setOpen(false));
+      });
+    })();
+  </script>
+</header>

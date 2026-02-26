@@ -1,0 +1,188 @@
+---
+import Layout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import CTA from "../../components/CTA.astro";
+import ContactForm from "../../components/ContactForm.astro";
+
+import { languages, type Lang, getContent } from "../../lib/i18n";
+import { CONTACT } from "../../config/site";
+
+export async function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+type TermsSection = { title: string; text: string };
+
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
+
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
+
+/* ---------------- HERO (defensivo) ---------------- */
+const pageTitle =
+  content?.terms?.hero?.title ??
+  (lang === "es" ? "Términos y Condiciones" : lang === "da" ? "Vilkår og Betingelser" : "Terms & Conditions");
+
+const lastUpdateLabel =
+  content?.terms?.hero?.lastUpdateLabel ??
+  (lang === "es" ? "Última actualización:" : lang === "da" ? "Sidst opdateret:" : "Last updated:");
+
+const lastUpdateValue = content?.terms?.hero?.lastUpdateValue ?? String(new Date().getFullYear());
+const pageSubtitle = `${lastUpdateLabel} ${lastUpdateValue}`;
+
+/* ---------------- SECTION copy ---------------- */
+const termsEyebrow =
+  content?.terms?.section?.eyebrow ?? (lang === "es" ? "TÉRMINOS" : lang === "da" ? "VILKÅR" : "TERMS");
+
+const termsTitle =
+  content?.terms?.section?.title ??
+  (lang === "es" ? "Términos y Condiciones" : lang === "da" ? "Vilkår og betingelser" : "Terms & Conditions");
+
+/* ---------------- CONTENT (defensivo) ---------------- */
+const sectionsRaw = content?.terms?.sections;
+
+const sectionsFallback: TermsSection[] = [
+  {
+    title: lang === "es" ? "1. Información General" : lang === "da" ? "1. Generel information" : "1. General information",
+    text:
+      lang === "es"
+        ? "HOFMA Homes ofrece información relacionada con inversión inmobiliaria en España. Esta información tiene carácter general y no constituye asesoramiento legal, fiscal o financiero personalizado."
+        : lang === "da"
+          ? "HOFMA Homes leverer information om ejendomsinvestering i Spanien. Denne information er generel og udgør ikke juridisk, skattemæssig eller finansiel rådgivning."
+          : "HOFMA Homes provides information related to real estate investment in Spain. This information is general in nature and does not constitute legal, tax, or financial advice.",
+  },
+  {
+    title: lang === "es" ? "2. Uso del Sitio Web" : lang === "da" ? "2. Brug af hjemmesiden" : "2. Use of the website",
+    text:
+      lang === "es"
+        ? "El usuario se compromete a utilizar el sitio de forma lícita y adecuada. No se permite el uso indebido, fraudulento o contrario a la normativa aplicable."
+        : lang === "da"
+          ? "Brugeren forpligter sig til at anvende hjemmesiden lovligt og korrekt. Misbrug eller ulovlig anvendelse er ikke tilladt."
+          : "Users agree to use the website lawfully and appropriately. Misuse or unlawful activity is not permitted.",
+  },
+  {
+    title: lang === "es" ? "3. Limitación de Responsabilidad" : lang === "da" ? "3. Ansvarsbegrænsning" : "3. Limitation of liability",
+    text:
+      lang === "es"
+        ? "HOFMA Homes no garantiza la exactitud absoluta de la información publicada y no se hace responsable de decisiones tomadas en base a dicha información sin asesoramiento profesional independiente."
+        : lang === "da"
+          ? "HOFMA Homes garanterer ikke fuldstændig nøjagtighed af den offentliggjorte information og påtager sig ikke ansvar for beslutninger truffet uden uafhængig professionel rådgivning."
+          : "HOFMA Homes does not guarantee absolute accuracy of published information and assumes no responsibility for decisions made without independent professional advice.",
+  },
+  {
+    title: lang === "es" ? "4. Propiedad Intelectual" : lang === "da" ? "4. Intellektuel ejendomsret" : "4. Intellectual property",
+    text:
+      lang === "es"
+        ? "Todos los contenidos del sitio (textos, diseño, estructura y marca) están protegidos por derechos de propiedad intelectual."
+        : lang === "da"
+          ? "Alt indhold på hjemmesiden (tekst, design, struktur og brand) er beskyttet af ophavsret."
+          : "All website content (text, design, structure, and branding) is protected by intellectual property rights.",
+  },
+  {
+    title: lang === "es" ? "5. Modificaciones" : lang === "da" ? "5. Ændringer" : "5. Modifications",
+    text:
+      lang === "es"
+        ? "HOFMA Homes se reserva el derecho de modificar estos términos en cualquier momento."
+        : lang === "da"
+          ? "HOFMA Homes forbeholder sig retten til at ændre disse vilkår til enhver tid."
+          : "HOFMA Homes reserves the right to modify these terms at any time.",
+  },
+];
+
+const sections: TermsSection[] =
+  Array.isArray(sectionsRaw) && sectionsRaw.length ? (sectionsRaw as TermsSection[]) : sectionsFallback;
+
+/* ---------------- LINKS (defensivo) ---------------- */
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+const calendlyTarget = hasCalendly ? "_blank" : undefined;
+const calendlyRel = hasCalendly ? "noopener noreferrer" : undefined;
+
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+/* Labels consistentes */
+const bookCallLabel =
+  content?.global?.cta?.bookACall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
+const whatsappLabel = content?.global?.cta?.whatsapp ?? "WhatsApp";
+const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+
+/* ---------------- SEO ---------------- */
+const seo = {
+  ...(content?.seo ?? {}),
+  title: pageTitle,
+  description: pageSubtitle,
+};
+
+/* ---------------- CONTACT standard ---------------- */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+---
+
+<Layout lang={lang} seo={seo}>
+  <PageHero title={pageTitle} subtitle={pageSubtitle} />
+
+  <main>
+    <section class="section">
+      <div class="container terms-content">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{termsEyebrow}</p>
+          <h2 class="h2">{termsTitle}</h2>
+        </header>
+
+        {sections.map((s: TermsSection) => (
+          <article class="terms-section">
+            <h3 class="h3">{s.title}</h3>
+            <p class="text">{s.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
+          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={bookCallLabel}
+            icon="calendar"
+            target={calendlyTarget}
+            rel={calendlyRel}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

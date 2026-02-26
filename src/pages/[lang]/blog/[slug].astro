@@ -1,0 +1,214 @@
+---
+import Layout from "../../../layouts/BaseLayout.astro";
+import PageHero from "../../../components/PageHero.astro";
+import CTA from "../../../components/CTA.astro";
+import ContactForm from "../../../components/ContactForm.astro";
+import FollowUS from "../../../components/FollowUS.astro";
+
+import { languages, type Lang, getContent } from "../../../lib/i18n";
+import { CONTACT } from "../../../config/site";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type BlogEntry = CollectionEntry<"blog">;
+
+/** entry.id = "da/first-post" => "first-post" (supports nested: "da/area/post" => "area/post") */
+const toLocalSlugFromId = (id: string) => id.split("/").slice(1).join("/");
+
+/** Runtime normalize (for finding the entry once params are known) */
+const normalizeLocalSlugRuntime = (entry: BlogEntry, lang: string) => {
+  const key = (entry.data as any)?.key;
+  if (key) return String(key);
+
+  const slugAny = (entry as any)?.slug;
+  if (slugAny) {
+    const s = String(slugAny);
+    return s.startsWith(`${lang}/`) ? s.slice(`${lang}/`.length) : s;
+  }
+
+  return toLocalSlugFromId(String(entry.id ?? ""));
+};
+
+/* REQUIRED for dynamic route */
+export async function getStaticPaths() {
+  // IMPORTANT: define helper inside getStaticPaths to avoid “not defined” in build output
+  const normalizeLocalSlug = (entry: BlogEntry, lang: string) => {
+    const key = (entry.data as any)?.key;
+    if (key) return String(key);
+
+    const slugAny = (entry as any)?.slug;
+    if (slugAny) {
+      const s = String(slugAny);
+      return s.startsWith(`${lang}/`) ? s.slice(`${lang}/`.length) : s;
+    }
+
+    return toLocalSlugFromId(String(entry.id ?? ""));
+  };
+
+  const paths: { params: { lang: string; slug: string } }[] = [];
+
+  for (const l of languages as unknown as string[]) {
+    const entries = await getCollection("blog", ({ id, data }) => id.startsWith(`${l}/`) && !data?.draft);
+
+    for (const entry of entries) {
+      const routeSlug = normalizeLocalSlug(entry as any, l);
+      if (!routeSlug) continue;
+
+      paths.push({
+        params: { lang: l, slug: String(routeSlug) },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { lang, slug } = Astro.params as { lang: Lang; slug: string };
+const content: any = getContent(lang);
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
+
+/* Find entry in THIS language by normalized local slug */
+const entries: BlogEntry[] = await getCollection("blog", ({ id, data }) => id.startsWith(`${lang}/`) && !data?.draft);
+const entry = entries.find((e) => normalizeLocalSlugRuntime(e, lang) === String(slug)) ?? null;
+
+if (!entry) throw new Error(`Artículo no encontrado: ${lang}/${slug}`);
+
+/* Render */
+const { Content } = await entry.render();
+
+/* Links (defensivo) */
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+const calendlyTarget = hasCalendly ? "_blank" : undefined;
+const calendlyRel = hasCalendly ? "noopener noreferrer" : undefined;
+
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+/* Labels */
+const backLabel = lang === "es" ? "Volver al blog" : lang === "da" ? "Tilbage til blog" : "Back to blog";
+
+const bookCallLabel =
+  content?.global?.cta?.bookACall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
+const whatsappLabel = content?.global?.cta?.whatsapp ?? "WhatsApp";
+const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+
+/* ---------------- SEO ---------------- */
+const origin = import.meta.env.DEV ? Astro.url.origin : Astro.site?.origin ?? Astro.url.origin;
+const canonical = `${String(origin).replace(/\/+$/, "")}/${lang}/blog/${slug}`;
+
+/**
+ * hreflangs:
+ * - If the post uses a shared `key`, we assume same slug across languages.
+ * - If not, emitting cross-lang hreflangs can be wrong; keep only current language.
+ */
+const hasSharedKey = Boolean((entry.data as any)?.key);
+const hreflangs = hasSharedKey
+  ? (languages as unknown as string[]).map((l) => ({ lang: l, url: `${String(origin).replace(/\/+$/, "")}/${l}/blog/${slug}` }))
+  : [{ lang, url: canonical }];
+
+const seo = {
+  ...(content?.seo ?? {}),
+  title: (entry.data as any)?.seo?.title ?? entry.data.title,
+  description: (entry.data as any)?.seo?.description ?? entry.data.excerpt ?? "",
+  canonical,
+  hreflangs,
+};
+
+/* CONTACT standard */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+/* Date string */
+const dateStr =
+  entry.data?.date instanceof Date
+    ? entry.data.date.toISOString().slice(0, 10)
+    : entry.data?.date
+      ? String(entry.data.date)
+      : "";
+---
+
+<Layout lang={lang} seo={seo}>
+  <section class="section blog-top">
+    <div class="container">
+      <a class="back-link" href={`/${lang}/blog`}>← {backLabel}</a>
+    </div>
+  </section>
+
+  <PageHero title={entry.data.title} subtitle={entry.data.excerpt ?? ""} align="left" size="md" className="blog-hero" />
+
+  <main>
+    <section class="section section-tight">
+      <div class="container blog-post-content">
+        {dateStr ? <p class="post-meta">{dateStr}</p> : null}
+
+        <article class="post-body">
+          <Content />
+        </article>
+
+        <div class="cta-inline">
+          <h2 class="h2">
+            {lang === "es"
+              ? "¿Quieres aplicar esto a tu caso?"
+              : lang === "da"
+                ? "Vil du anvende dette på din situation?"
+                : "Want to apply this to your situation?"}
+          </h2>
+
+          <div class="cta-row">
+            <CTA label={bookCallLabel} href={calendlyUrl} target={calendlyTarget} rel={calendlyRel} />
+            <CTA label={whatsappLabel} href={whatsappHref} />
+            <CTA label={callLabel} href={phoneHref} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <FollowUS lang={lang} className="follow-online" />
+
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
+          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={bookCallLabel}
+            icon="calendar"
+            target={calendlyTarget}
+            rel={calendlyRel}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

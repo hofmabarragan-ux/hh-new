@@ -1,48 +1,327 @@
 ---
 import Layout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
 import ContactForm from "../../components/ContactForm.astro";
+import CTA from "../../components/CTA.astro";
 
 import { languages, getContent, type Lang } from "../../lib/i18n";
+import { CONTACT } from "../../config/site";
 
-/* ✅ OBLIGATORIO para rutas dinámicas */
 export async function getStaticPaths() {
-  return languages.map((lang) => ({
-    params: { lang },
-  }));
+  return languages.map((lang) => ({ params: { lang } }));
 }
 
 const { lang } = Astro.params as { lang: Lang };
 const content = getContent(lang) as any;
 
-if (!content) {
-  throw new Error(`Idioma no soportado: ${lang}`);
-}
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
 
-// Texto traducido (fallback local, por si todavía no está en i18n)
-const introTextByLang: Record<Lang, string> = {
-  es: "Cuéntanos tus objetivos y diseñamos una estrategia de inversión personalizada.",
-  en: "Tell us about your goals and we will design a personalized investment strategy.",
-  da: "Fortæl os om dine mål, så designer vi en personlig investeringsstrategi.",
+/* ---------------- HERO (SIN CTAs fuera de Home) ---------------- */
+const pageTitle =
+  content?.investment?.hero?.title ??
+  (lang === "es" ? "Inversión" : lang === "da" ? "Investering" : "Investment");
+
+const pageSubtitle =
+  content?.investment?.hero?.subtitle ??
+  (lang === "es"
+    ? "Estrategia, criterios y acompañamiento para invertir en España con visión a largo plazo."
+    : lang === "da"
+      ? "Strategi, kriterier og rådgivning til investering i Spanien med et langsigtet perspektiv."
+      : "Strategy, criteria and guidance to invest in Spain with a long-term perspective.");
+
+/* SEO: BaseLayout espera `seo` */
+const seo = {
+  ...(content?.seo ?? {}),
+  title: pageTitle,
+  description: pageSubtitle,
 };
 
-const introText =
-  content.investment?.introText ?? introTextByLang[lang] ?? introTextByLang.es;
+/* ---------------- Section: INVESTMENT (grid 3) ---------------- */
+const investEyebrow =
+  content?.investment?.sections?.investment?.eyebrow ??
+  content?.investment?.investmentSection?.eyebrow ??
+  (lang === "es" ? "INVERSIÓN" : lang === "da" ? "INVESTERING" : "INVESTMENT");
+
+const investTitle =
+  content?.investment?.sections?.investment?.title ??
+  content?.investment?.investmentSection?.title ??
+  (lang === "es" ? "Modelo de inversión" : lang === "da" ? "Investeringsmodel" : "Investment model");
+
+const investSubtitle =
+  content?.investment?.sections?.investment?.subtitle ??
+  content?.investment?.investmentSection?.subtitle ??
+  (lang === "es"
+    ? "Una estructura clara para tomar decisiones con criterios."
+    : lang === "da"
+      ? "En klar struktur til at træffe beslutninger med kriterier."
+      : "A clear structure to make decisions with criteria.");
+
+/* Investment bullets (grid 3) */
+const bullets: { title: string; text: string }[] =
+  content?.investment?.bullets ?? [
+    {
+      title:
+        lang === "es"
+          ? "Estrategia antes que producto"
+          : lang === "da"
+            ? "Strategi før produkt"
+            : "Strategy before product",
+      text:
+        lang === "es"
+          ? "Definimos objetivos, horizonte y tolerancia al riesgo antes de seleccionar oportunidades."
+          : lang === "da"
+            ? "Vi afklarer mål, tidshorisont og risikotolerance før vi udvælger muligheder."
+            : "We define goals, horizon and risk tolerance before selecting opportunities.",
+    },
+    {
+      title:
+        lang === "es"
+          ? "Selección con criterios"
+          : lang === "da"
+            ? "Udvælgelse med kriterier"
+            : "Criteria-based selection",
+      text:
+        lang === "es"
+          ? "Analizamos ubicación, demanda, liquidez y potencial de revalorización."
+          : lang === "da"
+            ? "Vi analyserer beliggenhed, efterspørgsel, likviditet og værdistigningspotentiale."
+            : "We analyse location, demand, liquidity and appreciation potential.",
+    },
+    {
+      title:
+        lang === "es"
+          ? "Acompañamiento en todo el proceso"
+          : lang === "da"
+            ? "Rådgivning gennem hele processen"
+            : "End-to-end guidance",
+      text:
+        lang === "es"
+          ? "Te acompañamos con claridad en due diligence, negociación y cierre."
+          : lang === "da"
+            ? "Vi følger dig med klarhed i due diligence, forhandling og closing."
+            : "We guide you with clarity through due diligence, negotiation and closing.",
+    },
+  ];
+
+/* ---------------- WHAT WE COVER ---------------- */
+const coverEyebrow =
+  content?.investment?.info?.kicker ??
+  content?.investment?.sections?.cover?.eyebrow ??
+  (lang === "es" ? "GUÍA" : lang === "da" ? "GUIDE" : "GUIDE");
+
+const infoTitle =
+  content?.investment?.info?.title ??
+  (lang === "es" ? "Qué cubrimos" : lang === "da" ? "Hvad vi dækker" : "What we cover");
+
+const infoLead =
+  content?.investment?.info?.lead ??
+  (lang === "es"
+    ? "Préstamos, fracciones, propietarios, rentas y criterios para invertir en España."
+    : lang === "da"
+      ? "Lån, fraktioner, ejere, lejeindtægter og kriterier for at investere i Spanien."
+      : "Loans, fractions, owners, rental income and criteria to invest in Spain.");
+
+const infoItems: { title: string; text: string }[] =
+  content?.investment?.info?.items ?? [
+    {
+      title: lang === "es" ? "Préstamos" : lang === "da" ? "Lån" : "Loans",
+      text:
+        lang === "es"
+          ? "Opciones generales de financiación, escenarios y criterios (sin asesoría legal/fiscal en esta sección)."
+          : lang === "da"
+            ? "Overblik over finansiering, scenarier og kriterier (uden juridisk/skatterådgivning i denne sektion)."
+            : "High-level financing options, scenarios and criteria (no legal/tax advice in this section).",
+    },
+    {
+      title: lang === "es" ? "Fracciones" : lang === "da" ? "Fraktioner" : "Fractions",
+      text:
+        lang === "es"
+          ? "Cómo funciona el modelo, riesgos comunes y qué validar antes de entrar."
+          : lang === "da"
+            ? "Hvordan modellen fungerer, typiske risici og hvad der skal valideres før du går ind."
+            : "How the model works, common risks, and what to validate before entering.",
+    },
+    {
+      title: lang === "es" ? "Propietarios" : lang === "da" ? "Ejere" : "Owners",
+      text:
+        lang === "es"
+          ? "Estructuras típicas, responsabilidades y puntos de control."
+          : lang === "da"
+            ? "Typiske strukturer, ansvar og kontrolpunkter."
+            : "Typical structures, responsibilities and checkpoints.",
+    },
+    {
+      title: lang === "es" ? "Ganancias y rentas" : lang === "da" ? "Afkast og leje" : "Returns & rent",
+      text:
+        lang === "es"
+          ? "Qué variables mueven el rendimiento y cómo pensar escenarios."
+          : lang === "da"
+            ? "Hvilke variabler påvirker afkast, og hvordan man tænker i scenarier."
+            : "What drives performance and how to think in scenarios.",
+    },
+  ];
+
+/* ---------------- Calculator placeholder ---------------- */
+const calcEyebrow =
+  content?.investment?.calculator?.eyebrow ??
+  (lang === "es" ? "CALCULADORA" : lang === "da" ? "BEREGNER" : "CALCULATOR");
+
+const calculatorTitle =
+  content?.investment?.calculator?.title ??
+  (lang === "es"
+    ? "Calculadora de rentas (próximamente)"
+    : lang === "da"
+      ? "Leje-beregner (kommer snart)"
+      : "Rental calculator (coming soon)");
+
+const calculatorText =
+  content?.investment?.calculator?.text ??
+  (lang === "es"
+    ? "Aquí agregaremos una herramienta para estimar ingresos, costes y rentabilidad con supuestos claros."
+    : lang === "da"
+      ? "Her tilføjer vi et værktøj til at estimere indtægter, omkostninger og afkast med klare antagelser."
+      : "We’ll add a tool here to estimate income, costs and returns with clear assumptions.");
+
+const talkToUsLabel =
+  content?.investment?.calculator?.ctaLabel ??
+  (lang === "es" ? "Hablar con nosotros" : lang === "da" ? "Tal med os" : "Talk to us");
+
+/* Anchor al contacto estándar (misma página) */
+const contactAnchor = `#contact`;
+
+/* ---------------- CONTACT standard ---------------- */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+/* Contact links (defensivo) */
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+
+/* Readable labels (CTA icons) */
+const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+const whatsappLabel = content?.global?.cta?.whatsapp ?? "WhatsApp";
+const bookCallLabel =
+  content?.global?.cta?.bookACall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
 ---
 
-<Layout lang={lang} seo={content.seo}>
-  <section>
-    <h1>{content.ctas.primary.label}</h1>
+<Layout lang={lang} seo={seo}>
+  <!-- HERO (SIN CTAs) -->
+  <PageHero title={pageTitle} subtitle={pageSubtitle} />
 
-    <p>{introText}</p>
+  <main>
+    <!-- INVESTMENT (Grid 3) -->
+    <section class="section">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{investEyebrow}</p>
+          <h2 class="h2">{investTitle}</h2>
+          {investSubtitle ? <p class="lead">{investSubtitle}</p> : null}
+        </header>
 
-    <a href={content.ctas.primary.href}>
-      {content.ctas.primary.label}
-    </a>
-  </section>
+        <div class="grid-3">
+          {bullets.map((b) => (
+            <article class="card">
+              <h3 class="h3">{b.title}</h3>
+              <p class="text">{b.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
 
-  <ContactForm
-    title={content.contactForm.title}
-    text={content.contactForm.text}
-    button={content.contactForm.button}
-  />
+    <!-- WHAT WE COVER -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{coverEyebrow}</p>
+          <h2 class="h2">{infoTitle}</h2>
+          {infoLead ? <p class="lead">{infoLead}</p> : null}
+        </header>
+
+        <div class="grid-2">
+          {infoItems.map((it) => (
+            <article class="card">
+              <h3 class="h3">{it.title}</h3>
+              <p class="text">{it.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- RENTAL CALCULATOR (placeholder) -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{calcEyebrow}</p>
+          <h2 class="h2">{calculatorTitle}</h2>
+          {calculatorText ? <p class="lead">{calculatorText}</p> : null}
+        </header>
+
+        <div class="card">
+          <p class="text">
+            {lang === "es"
+              ? "Inputs, supuestos y resultados se implementarán en la siguiente fase."
+              : lang === "da"
+                ? "Inputs, antagelser og resultater implementeres i næste fase."
+                : "Inputs, assumptions and outputs will be implemented in the next phase."}
+          </p>
+
+          <div class="cta-row">
+            <a class="button-secondary" href={contactAnchor}>{talkToUsLabel}</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT (standard + form) -->
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
+          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={bookCallLabel}
+            icon="calendar"
+            target={hasCalendly ? "_blank" : undefined}
+            rel={hasCalendly ? "noopener noreferrer" : undefined}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
 </Layout>

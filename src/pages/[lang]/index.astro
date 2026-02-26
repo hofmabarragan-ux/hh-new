@@ -2,91 +2,342 @@
 import Layout from "../../layouts/BaseLayout.astro";
 import Newsletter from "../../components/Newsletter.astro";
 import ContactForm from "../../components/ContactForm.astro";
+import CTA from "../../components/CTA.astro";
+import FollowUS from "../../components/FollowUS.astro";
 
 import { languages, type Lang, getContent } from "../../lib/i18n";
+import { CONTACT } from "../../config/site";
 
-/* REQUIRED for dynamic route */
 export async function getStaticPaths() {
-  return languages.map((lang) => ({
-    params: { lang },
-  }));
+  return languages.map((lang) => ({ params: { lang } }));
 }
 
 const { lang } = Astro.params as { lang: Lang };
 const content = getContent(lang) as any;
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
 
-if (!content) {
-  throw new Error(`Idioma no soportado: ${lang}`);
-}
+/* Links centralizados (defensivo) */
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+
+/* Anchor al contacto estándar (misma página) */
+const contactAnchor = `#contact`;
+
+/* CTA labels (local fallbacks) */
+const servicesCtaLabel =
+  content?.ctas?.services?.label ??
+  (lang === "es" ? "Ver servicios" : lang === "da" ? "Se services" : "View services");
+
+const projectsCtaLabel =
+  content?.ctas?.projects?.label ??
+  (lang === "es"
+    ? "Ver catálogo de proyectos"
+    : lang === "da"
+      ? "Se projektkatalog"
+      : "View project catalogue");
+
+const aboutCtaLabel =
+  content?.ctas?.about?.label ??
+  (lang === "es" ? "Ver About" : lang === "da" ? "Se About" : "View About");
+
+const primaryCtaLabel =
+  content?.ctas?.primary?.label ??
+  (lang === "es"
+    ? "Agendar llamada estratégica"
+    : lang === "da"
+      ? "Book strategisk samtale"
+      : "Book a call");
+
+const contactCtaLabel = lang === "es" ? "Contactar" : lang === "da" ? "Kontakt" : "Contact";
+
+/* Home hero fallbacks */
+const heroTitle = content?.home?.hero?.title ?? content?.seo?.title ?? "HOFMA Homes";
+const heroSubtitle = content?.home?.hero?.subtitle ?? content?.seo?.description ?? "";
+
+/* Services section fallbacks */
+const servicesKicker =
+  content?.home?.services?.kicker ??
+  (lang === "es" ? "WHAT WE OFFER" : lang === "da" ? "HVAD VI TILBYDER" : "WHAT WE OFFER");
+
+const servicesTitle =
+  content?.home?.services?.title ??
+  (lang === "es" ? "Services" : lang === "da" ? "Services" : "Services");
+
+const servicesLead =
+  content?.home?.services?.lead ??
+  (lang === "es"
+    ? "Trabajamos con un enfoque estratégico y acompañamiento de principio a fin."
+    : lang === "da"
+      ? "Vi arbejder strategisk og følger dig hele vejen fra start til slut."
+      : "We work with a strategic approach and guide you end-to-end.");
+
+const servicesPreviewFallback =
+  lang === "es"
+    ? [
+        { title: "Selección estratégica", text: "Filtrado por objetivo, riesgo y viabilidad." },
+        { title: "Estructura clara", text: "Términos, retornos y plan operativo." },
+        { title: "Ejecución y seguimiento", text: "Coordinación y comunicación constante." },
+      ]
+    : lang === "da"
+      ? [
+          { title: "Strategisk udvælgelse", text: "Filtrering efter mål, risiko og realisme." },
+          { title: "Klar struktur", text: "Vilkår, afkast og operationel plan." },
+          { title: "Eksekvering og opfølgning", text: "Koordinering og løbende opdateringer." },
+        ]
+      : [
+          { title: "Strategic selection", text: "Filtering by goal, risk, and viability." },
+          { title: "Clear structure", text: "Terms, returns, and an operational plan." },
+          { title: "Execution & follow-up", text: "Coordination and continuous updates." },
+        ];
+
+const servicesPreviewItemsRaw = (content?.services?.list ?? []).slice(0, 3);
+const servicesPreviewItems = servicesPreviewItemsRaw.length ? servicesPreviewItemsRaw : servicesPreviewFallback;
+
+/* WHY */
+const whyTitle =
+  content?.why?.title ??
+  (lang === "es" ? "Why HOFMA Homes" : lang === "da" ? "Hvorfor HOFMA Homes" : "Why HOFMA Homes");
+
+const whyItemsFallback =
+  lang === "es"
+    ? [
+        { title: "Criterio antes que volumen", text: "Filtramos oportunidades con foco en calidad, riesgo y viabilidad." },
+        { title: "Acompañamiento real", text: "Te guiamos en el proceso con claridad, contexto y prioridades." },
+        { title: "Estructura y transparencia", text: "Decisiones con información: pasos, tiempos y expectativas claras." },
+      ]
+    : lang === "da"
+      ? [
+          { title: "Kriterier før volumen", text: "Vi filtrerer muligheder med fokus på kvalitet, risiko og realisme." },
+          { title: "Reel sparring", text: "Vi guider dig i processen med klarhed, kontekst og prioriteringer." },
+          { title: "Struktur og transparens", text: "Beslutninger med overblik: trin, timing og tydelige forventninger." },
+        ]
+      : [
+          { title: "Criteria over volume", text: "We filter opportunities focusing on quality, risk, and viability." },
+          { title: "Real guidance", text: "We support you throughout the process with clarity and priorities." },
+          { title: "Structure and transparency", text: "Decisions with context: steps, timelines, and clear expectations." },
+        ];
+
+const whyItems = (content?.why?.items ?? []).length ? content.why.items : whyItemsFallback;
+
+/* FEATURED PROJECTS */
+const featuredTitle =
+  content?.featuredProjects?.title ??
+  (lang === "es" ? "Featured projects" : lang === "da" ? "Udvalgte projekter" : "Featured projects");
+
+const featuredItems = (content?.featuredProjects?.items ?? []).slice(0, 3);
+
+const viewProjectLabel =
+  content?.ctas?.viewProject?.label ??
+  (lang === "es" ? "Ver proyecto" : lang === "da" ? "Se projekt" : "View project");
+
+/* Newsletter props (defensivo) */
+const newsletterProps = content?.newsletter ?? {
+  title: lang === "es" ? "Newsletter" : lang === "da" ? "Nyhedsbrev" : "Newsletter",
+  text:
+    lang === "es"
+      ? "Análisis, ideas estratégicas y oportunidades seleccionadas. Sin ruido. Sin spam."
+      : lang === "da"
+        ? "Analyse, strategiske indsigter og udvalgte muligheder. Ingen støj. Ingen spam."
+        : "Analysis, strategic insights and selected opportunities. No noise. No spam.",
+  placeholder: lang === "es" ? "Tu email" : lang === "da" ? "Din email" : "Your email",
+  button: lang === "es" ? "Suscribirme" : lang === "da" ? "Tilmeld" : "Subscribe",
+};
+
+/* CONTACT standard */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+/* Contact links */
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
 ---
 
 <Layout lang={lang} seo={content.seo}>
+  <!-- HERO (con CTAs SOLO en Home) -->
+  <section class="home-hero">
+    <div class="hero-content">
+      <h1>{heroTitle}</h1>
+
+      {heroSubtitle ? <p class="hero-subtitle">{heroSubtitle}</p> : null}
+
+      <div class="hero-actions">
+        <a
+          class="button-primary"
+          href={calendlyUrl}
+          target={hasCalendly ? "_blank" : undefined}
+          rel={hasCalendly ? "noopener noreferrer" : undefined}
+        >
+          {primaryCtaLabel}
+        </a>
+
+        <a class="button-secondary" href={contactAnchor}>
+          {contactCtaLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="home-services">
+    <div class="container">
+      <header class="home-section-head">
+        <div class="home-kicker">{servicesKicker}</div>
+        <h2 class="home-title">{servicesTitle}</h2>
+        <p class="home-lead">{servicesLead}</p>
+      </header>
+
+      <div class="home-cards-3">
+        {servicesPreviewItems.map((item: any) => (
+          <article class="home-card">
+            <div class="home-card-icon" aria-hidden="true">○</div>
+            <h3 class="home-card-title">{item.title}</h3>
+            <p class="home-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="home-section-cta">
+        <a class="button-secondary" href={`/${lang}/services`}>
+          {servicesCtaLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- WHY -->
   <section class="why">
     <div class="container">
-      <h1>{content.why.title}</h1>
+      <header class="section-header section-header--center">
+        <h2 class="h2">{whyTitle}</h2>
+      </header>
 
       <div class="why-grid">
-        {content.why.items.map((item) => (
-          <div class="why-card">
-            <h3>{item.title}</h3>
-            <p>{item.text}</p>
-          </div>
+        {whyItems.map((item: any) => (
+          <article class="why-card">
+            <h3 class="h3">{item.title}</h3>
+            <p class="text">{item.text}</p>
+          </article>
         ))}
+      </div>
+
+      <div class="home-section-cta">
+        <a class="button-secondary" href={`/${lang}/about`}>
+          {aboutCtaLabel}
+        </a>
       </div>
     </div>
   </section>
 
   <!-- FEATURED PROJECTS -->
-  <section class="featured">
+  <section class="section">
     <div class="container">
-      <h2>{content.featuredProjects.title}</h2>
+      <header class="section-header section-header--center">
+        <h2 class="h2">{featuredTitle}</h2>
+      </header>
 
-      <div class="projects-grid">
-        {content.featuredProjects.items.map((project) => (
-          <article class="project-card">
-            <div class="project-content">
-              <h3>{project.title}</h3>
-              <p class="project-location">{project.location}</p>
-              <p>{project.text}</p>
+      {featuredItems.length ? (
+        <>
+          <div class="projects-grid">
+            {featuredItems.map((project: any) => (
+              <article class="project-card">
+                <h3 class="h3">{project.title}</h3>
+                {project.location ? <p class="project-location">{project.location}</p> : null}
+                {project.text ? <p class="text">{project.text}</p> : null}
 
-              <a href={`/${lang}/projects/${project.slug}`} class="project-link">
-                {content.ctas.viewProject.label}
-              </a>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
+                {project.slug ? (
+                  <a href={`/${lang}/projects/${project.slug}`} class="project-link">
+                    {viewProjectLabel}
+                  </a>
+                ) : null}
+              </article>
+            ))}
+          </div>
 
-  <!-- CONTACT -->
-  <section class="contact-cta">
-    <div class="container">
-      <h2>{content.contact?.title ?? "Contact"}</h2>
-      <p>{content.contact?.text}</p>
+          <div class="home-section-cta">
+            <a class="button-secondary" href={`/${lang}/projects`}>
+              {projectsCtaLabel}
+            </a>
+          </div>
+        </>
+      ) : (
+        <div class="card">
+          <p class="text">
+            {lang === "es"
+              ? "Estamos preparando el catálogo de proyectos."
+              : lang === "da"
+                ? "Vi er ved at forberede projektkataloget."
+                : "We are preparing the project catalogue."}
+          </p>
 
-      <a href={content.ctas.primary.href} class="cta">
-        {content.ctas.primary.label}
-      </a>
+          <div class="home-section-cta">
+            <a class="button-secondary" href={`/${lang}/projects`}>
+              {projectsCtaLabel}
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   </section>
 
   <!-- NEWSLETTER -->
-  <section>
+  <section class="section home-newsletter">
     <div class="container">
-      <Newsletter {...content.newsletter} />
+      <Newsletter {...newsletterProps} />
     </div>
   </section>
 
-  <!-- CONTACT FORM -->
-  <section>
+  <!-- FOLLOW US (permitido en Home) -->
+  <FollowUS lang={lang} className="follow-online" />
+
+  <!-- CONTACT -->
+  <section id="contact" class="section section-contact">
     <div class="container">
-      <ContactForm
-        title={content.contactForm.title}
-        text={content.contactForm.text}
-        button={content.contactForm.button}
-      />
+      <header class="section-header section-header--center">
+        <h2 class="h2">{contactTitle}</h2>
+        {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+      </header>
+
+      <div class="contact-ctas">
+        <CTA href={phoneHref} variant="icon" label={content?.global?.cta?.call ?? "Call"} icon="phone" />
+        <CTA
+          href={whatsappHref}
+          variant="icon"
+          label={content?.global?.cta?.whatsapp ?? "WhatsApp"}
+          icon="whatsapp"
+        />
+        <CTA
+          href={calendlyUrl}
+          variant="icon"
+          label={content?.global?.cta?.bookACall ?? "Book a call"}
+          icon="calendar"
+          target={hasCalendly ? "_blank" : undefined}
+          rel={hasCalendly ? "noopener noreferrer" : undefined}
+        />
+      </div>
+
+      <div class="contact-form-wrap">
+        <ContactForm
+          button={formButton}
+          nameLabel={nameLabel}
+          namePlaceholder={namePlaceholder}
+          emailLabel={emailLabel}
+          emailPlaceholder={emailPlaceholder}
+          messageLabel={messageLabel}
+          messagePlaceholder={messagePlaceholder}
+        />
+      </div>
     </div>
   </section>
 </Layout>

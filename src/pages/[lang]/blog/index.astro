@@ -1,0 +1,257 @@
+---
+import Layout from "../../../layouts/BaseLayout.astro";
+import PageHero from "../../../components/PageHero.astro";
+import Newsletter from "../../../components/Newsletter.astro";
+import CTA from "../../../components/CTA.astro";
+import ContactForm from "../../../components/ContactForm.astro";
+import FollowUS from "../../../components/FollowUS.astro";
+
+import { languages, type Lang, getContent } from "../../../lib/i18n";
+import { CONTACT } from "../../../config/site";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+type BlogEntry = CollectionEntry<"blog">;
+
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
+
+/* ---------------- HERO ---------------- */
+const title = content?.blog?.hero?.title ?? "Blog";
+const subtitle =
+  content?.blog?.hero?.subtitle ??
+  (lang === "es"
+    ? "Artículos y análisis sobre inversión inmobiliaria en España."
+    : lang === "da"
+      ? "Artikler og analyser om ejendomsinvestering i Spanien."
+      : "Articles and analysis about real estate investing in Spain.");
+
+/* ---------------- FILTERS (placeholder) ---------------- */
+const filtersEyebrow =
+  content?.blog?.filters?.eyebrow ?? (lang === "es" ? "FILTROS" : lang === "da" ? "FILTRE" : "FILTERS");
+
+const filtersTitle =
+  content?.blog?.filters?.title ??
+  (lang === "es" ? "Filtrar posts" : lang === "da" ? "Filtrér posts" : "Filter posts");
+
+const filtersSubtitle =
+  content?.blog?.filters?.subtitle ??
+  (lang === "es"
+    ? "Categorías, etiquetas y búsqueda se activarán en la siguiente fase."
+    : lang === "da"
+      ? "Kategorier, tags og søgning aktiveres i næste fase."
+      : "Categories, tags and search will be enabled in the next phase.");
+
+/* ---------------- POSTS SECTION COPY ---------------- */
+const postsEyebrow =
+  content?.blog?.postsSection?.eyebrow ?? (lang === "es" ? "POSTS" : lang === "da" ? "INLÆG" : "POSTS");
+
+const postsTitle =
+  content?.blog?.postsSection?.title ??
+  (lang === "es" ? "Últimos artículos" : lang === "da" ? "Seneste artikler" : "Latest articles");
+
+const postsSubtitle =
+  content?.blog?.postsSection?.subtitle ??
+  (lang === "es"
+    ? "Publicación en Fase B con artículos, categorías y páginas por post."
+    : lang === "da"
+      ? "Udgives i Fase B med artikler, kategorier og postsider."
+      : "Launching in Phase B with articles, categories and post pages.");
+
+/* ---------------- CONTENT COLLECTIONS: posts por idioma ---------------- */
+const all: BlogEntry[] = await getCollection("blog", ({ id, data }) => {
+  const inLang = typeof id === "string" && id.startsWith(`${lang}/`);
+  const notDraft = !data?.draft;
+  return inLang && notDraft;
+});
+
+/* Sort por date desc (defensivo) */
+const posts = all
+  .slice()
+  .sort((a: BlogEntry, b: BlogEntry) => {
+    const ad = a.data?.date ? new Date(a.data.date as any).getTime() : -Infinity;
+    const bd = b.data?.date ? new Date(b.data.date as any).getTime() : -Infinity;
+    return bd - ad;
+  });
+
+/* ---------------- NEWSLETTER PROPS (defensivo) ---------------- */
+const newsletterProps = content?.newsletter ?? {
+  title: lang === "es" ? "Newsletter" : lang === "da" ? "Nyhedsbrev" : "Newsletter",
+  text:
+    lang === "es"
+      ? "Recibe actualizaciones relevantes sin ruido."
+      : lang === "da"
+        ? "Få relevante opdateringer uden støj."
+        : "Get relevant updates without noise.",
+  placeholder: lang === "es" ? "Tu email" : lang === "da" ? "Din email" : "Your email",
+  button: lang === "es" ? "Suscribirme" : lang === "da" ? "Tilmeld" : "Subscribe",
+};
+
+/* ---------------- CONTACT LINKS (defensivo) ---------------- */
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+const calendlyTarget = hasCalendly ? "_blank" : undefined;
+const calendlyRel = hasCalendly ? "noopener noreferrer" : undefined;
+
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+/* Labels consistentes */
+const bookCallLabel =
+  content?.global?.cta?.bookACall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
+const whatsappLabel = content?.global?.cta?.whatsapp ?? "WhatsApp";
+const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+
+/* ---------------- CONTACT STANDARD ---------------- */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+
+/* Read label */
+const readLabel = lang === "es" ? "Leer" : lang === "da" ? "Læs" : "Read";
+
+/** entry.id = "da/first-post" => "first-post" (supports nested: "da/area/post" => "area/post") */
+const toLocalSlugFromId = (id: string) => id.split("/").slice(1).join("/");
+
+/** Normalize slug sources: key | entry.slug | entry.id */
+const toLocalSlug = (entry: BlogEntry) => {
+  const key = (entry.data as any)?.key;
+  if (key) return String(key);
+
+  const slugAny = (entry as any)?.slug;
+  if (slugAny) {
+    const s = String(slugAny);
+    return s.startsWith(`${lang}/`) ? s.slice(`${lang}/`.length) : s;
+  }
+
+  return toLocalSlugFromId(String(entry.id ?? ""));
+};
+
+const getPostHref = (entry: BlogEntry) => `/${lang}/blog/${toLocalSlug(entry)}`;
+
+/* ---------------- SEO override ---------------- */
+const seo = {
+  ...(content?.seo ?? {}),
+  title,
+  description: subtitle,
+};
+---
+
+<Layout lang={lang} seo={seo}>
+  <PageHero title={title} subtitle={subtitle} />
+
+  <main>
+    <!-- FILTERS -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{filtersEyebrow}</p>
+          <h2 class="h2">{filtersTitle}</h2>
+          {filtersSubtitle ? <p class="lead">{filtersSubtitle}</p> : null}
+        </header>
+
+        <div class="pill-row" aria-label="Blog filters placeholder">
+          <div class="pill">{lang === "es" ? "Categoría" : lang === "da" ? "Kategori" : "Category"}</div>
+          <div class="pill">{lang === "es" ? "Etiqueta" : lang === "da" ? "Tag" : "Tag"}</div>
+          <div class="pill">{lang === "es" ? "Búsqueda" : lang === "da" ? "Søgning" : "Search"}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- POSTS -->
+    <section class="section section-tight">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{postsEyebrow}</p>
+          <h2 class="h2">{postsTitle}</h2>
+          {postsSubtitle ? <p class="lead">{postsSubtitle}</p> : null}
+        </header>
+
+        {posts.length ? (
+          <div class="grid-3">
+            {posts.map((entry: BlogEntry) => (
+              <article class="card">
+                <h3 class="h3">{entry.data.title}</h3>
+                {entry.data.excerpt ? <p class="text">{entry.data.excerpt}</p> : null}
+                <a class="post-link" href={getPostHref(entry)}>
+                  {readLabel}
+                </a>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="card">
+            <h3 class="h3">{lang === "es" ? "Próximamente" : lang === "da" ? "Kommer snart" : "Coming soon"}</h3>
+            <p class="text">
+              {lang === "es"
+                ? "Aún no hay posts publicados para este idioma."
+                : lang === "da"
+                  ? "Der er endnu ingen publicerede indlæg på dette sprog."
+                  : "There are no published posts for this language yet."}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="section blog-newsletter">
+      <div class="container">
+        <Newsletter {...newsletterProps} />
+      </div>
+    </section>
+
+    <!-- FOLLOW US (permitido en Blog) -->
+    <FollowUS lang={lang} className="follow-online" />
+
+    <!-- CONTACT -->
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
+          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={bookCallLabel}
+            icon="calendar"
+            target={calendlyTarget}
+            rel={calendlyRel}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

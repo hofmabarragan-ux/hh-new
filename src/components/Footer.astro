@@ -1,0 +1,184 @@
+---
+import type { Lang } from "../lib/i18n";
+
+type Props = {
+  lang: Lang;
+
+  homeHref: string;
+  servicesHref: string;
+  investmentHref: string;
+  projectsHref: string;
+  aboutHref: string;
+  blogHref: string;
+  termsHref: string;
+  cookieHref: string;
+
+  footerHomeLabel: string;
+  navServices: string;
+  navInvestment: string;
+  navProjects: string;
+  navAbout: string;
+  navBlog: string;
+  navTerms: string;
+  navCookie: string;
+
+  navEmail: string;
+  navCall: string;
+  navBookCall: string;
+
+  emailUrl: string;
+  phoneUrl: string;
+  whatsappUrl: string;
+  calendlyUrl: string;
+
+  social: {
+    facebook: string;
+    instagram: string;
+    tiktok: string;
+    youtube: string;
+    linkedin: string;
+  };
+
+  hasPhone: boolean;
+};
+
+const {
+  homeHref,
+  servicesHref,
+  investmentHref,
+  projectsHref,
+  aboutHref,
+  blogHref,
+  termsHref,
+  cookieHref,
+  footerHomeLabel,
+  navServices,
+  navInvestment,
+  navProjects,
+  navAbout,
+  navBlog,
+  navTerms,
+  navCookie,
+  navEmail,
+  navCall,
+  navBookCall,
+  emailUrl,
+  phoneUrl,
+  whatsappUrl,
+  calendlyUrl,
+  social,
+  hasPhone,
+} = Astro.props as Props;
+
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <!-- Row 1: Logo | Main Menu | CTA -->
+    <div class="footer-row footer-row--top">
+      <div class="footer-brand">
+        <a href={homeHref}>HOFMA Homes</a>
+      </div>
+
+      <nav class="footer-menu" aria-label="Footer navigation">
+        <a href={homeHref}>{footerHomeLabel}</a>
+        <a href={servicesHref}>{navServices}</a>
+        <a href={investmentHref}>{navInvestment}</a>
+        <a href={projectsHref}>{navProjects}</a>
+        <a href={aboutHref}>{navAbout}</a>
+        <a href={blogHref}>{navBlog}</a>
+        <a href={termsHref}>{navTerms}</a>
+        <a href={cookieHref}>{navCookie}</a>
+      </nav>
+
+      <div class="footer-cta">
+        {hasCalendly ? (
+          <a href={calendlyUrl} class="button-primary" target="_blank" rel="noopener noreferrer">
+            {navBookCall}
+          </a>
+        ) : (
+          <a href={homeHref + "#contact"} class="button-primary">{navBookCall}</a>
+        )}
+      </div>
+    </div>
+
+    <!-- Row 2: Copy | Social icons | Contact icons -->
+    <div class="footer-row footer-row--bottom">
+      <div class="footer-copy">© {new Date().getFullYear()} HOFMA Homes</div>
+
+      <div class="footer-icons" aria-label="Footer icons">
+        <div class="footer-social icon-group" aria-label="Social links">
+          <!-- Social (NO RSS) -->
+          <a
+            class="icon-btn"
+            data-ico="facebook"
+            href={social.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+          >
+            FB
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="instagram"
+            href={social.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            IG
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="tiktok"
+            href={social.tiktok}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok"
+          >
+            TT
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="youtube"
+            href={social.youtube}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+          >
+            YT
+          </a>
+          <a
+            class="icon-btn"
+            data-ico="linkedin"
+            href={social.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+          >
+            IN
+          </a>
+        </div>
+
+        <div class="footer-contact icon-group" aria-label="Contact links">
+          <a class="icon-btn" data-ico="email" href={emailUrl} aria-label={navEmail}>@</a>
+          {hasPhone ? (
+            <a class="icon-btn" data-ico="phone" href={phoneUrl} aria-label={navCall}>TEL</a>
+          ) : null}
+          <a
+            class="icon-btn"
+            data-ico="whatsapp"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+          >
+            WA
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

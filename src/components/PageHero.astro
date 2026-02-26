@@ -1,0 +1,36 @@
+---
+type Props = {
+  title: string;
+  subtitle?: string;
+  align?: "left" | "center";
+  size?: "md" | "lg";
+  eyebrow?: string;
+  id?: string;
+  className?: string;
+};
+
+const {
+  title,
+  subtitle,
+  align = "center",
+  size = "lg",
+  eyebrow,
+  id,
+  className = "",
+} = Astro.props;
+---
+
+<section
+  id={id}
+  class={`page-hero ${
+    align === "left" ? "page-hero--left" : "page-hero--center"
+  } ${size === "md" ? "page-hero--md" : "page-hero--lg"} ${className}`}
+>
+  <div class="container">
+    <div class="page-hero__inner">
+      {eyebrow ? <p class="page-hero__eyebrow">{eyebrow}</p> : null}
+      <h1 class="page-hero__title">{title}</h1>
+      {subtitle ? <p class="page-hero__subtitle">{subtitle}</p> : null}
+    </div>
+  </div>
+</section>

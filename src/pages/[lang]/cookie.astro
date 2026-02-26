@@ -1,0 +1,175 @@
+---
+import Layout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import CTA from "../../components/CTA.astro";
+import ContactForm from "../../components/ContactForm.astro";
+
+import { languages, type Lang, getContent } from "../../lib/i18n";
+import { CONTACT } from "../../config/site";
+
+export async function getStaticPaths() {
+  return languages.map((lang) => ({ params: { lang } }));
+}
+
+type PolicySection = { title: string; text: string };
+
+const { lang } = Astro.params as { lang: Lang };
+const content = getContent(lang) as any;
+
+if (!content) throw new Error(`Idioma no soportado: ${lang}`);
+
+/* ---------------- HERO (defensivo) ---------------- */
+const title =
+  content?.cookiePolicy?.hero?.title ??
+  (lang === "es" ? "Cookies y Privacidad" : lang === "da" ? "Cookies og privatliv" : "Cookies & Privacy");
+
+const subtitle =
+  content?.cookiePolicy?.hero?.subtitle ??
+  (lang === "es"
+    ? "Resumen de cookies, privacidad y uso básico del sitio."
+    : lang === "da"
+      ? "Overblik over cookies, privatliv og grundlæggende brug af sitet."
+      : "An overview of cookies, privacy, and basic website use.");
+
+/* ---------------- SECTION copy ---------------- */
+const sectionEyebrow =
+  content?.cookiePolicy?.section?.eyebrow ?? (lang === "es" ? "POLICY" : lang === "da" ? "POLITIK" : "POLICY");
+
+const sectionTitle =
+  content?.cookiePolicy?.section?.title ??
+  (lang === "es"
+    ? "Cookie & Privacy Policy"
+    : lang === "da"
+      ? "Cookie- og privatlivspolitik"
+      : "Cookie & Privacy Policy");
+
+/* ---------------- CONTENT (defensivo) ---------------- */
+const sectionsRaw = content?.cookiePolicy?.sections;
+
+const sectionsFallback: PolicySection[] = [
+  {
+    title: lang === "es" ? "1. Cookies" : lang === "da" ? "1. Cookies" : "1. Cookies",
+    text:
+      lang === "es"
+        ? "Utilizamos cookies técnicas y, en el futuro, cookies analíticas para mejorar el sitio."
+        : lang === "da"
+          ? "Vi bruger tekniske cookies og kan senere tilføje analytiske cookies for at forbedre sitet."
+          : "We use technical cookies and may add analytics cookies in the future to improve the website.",
+  },
+  {
+    title: lang === "es" ? "2. Datos personales" : lang === "da" ? "2. Persondata" : "2. Personal data",
+    text:
+      lang === "es"
+        ? "Si nos contactas, utilizaremos tus datos únicamente para responder a tu solicitud."
+        : lang === "da"
+          ? "Hvis du kontakter os, bruger vi dine data udelukkende til at svare på din henvendelse."
+          : "If you contact us, we use your data only to respond to your request.",
+  },
+  {
+    title: lang === "es" ? "3. Terceros" : lang === "da" ? "3. Tredjeparter" : "3. Third parties",
+    text:
+      lang === "es"
+        ? "Algunos enlaces (WhatsApp o Calendly) te llevan a servicios de terceros con sus propias políticas."
+        : lang === "da"
+          ? "Nogle links (WhatsApp eller Calendly) fører til tredjepartstjenester med egne politikker."
+          : "Some links (WhatsApp or Calendly) take you to third-party services with their own policies.",
+  },
+];
+
+const sections: PolicySection[] =
+  Array.isArray(sectionsRaw) && sectionsRaw.length ? (sectionsRaw as PolicySection[]) : sectionsFallback;
+
+/* ---------------- LINKS (defensivo) ---------------- */
+const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
+const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
+const calendlyTarget = hasCalendly ? "_blank" : undefined;
+const calendlyRel = hasCalendly ? "noopener noreferrer" : undefined;
+
+const phone = CONTACT?.phone ?? "";
+const phoneHref = CONTACT?.phoneHref ?? (phone ? `tel:${phone}` : "#");
+
+const whatsapp = CONTACT?.whatsapp ?? "";
+const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, "")}` : "#");
+
+/* Labels consistentes */
+const bookCallLabel =
+  content?.global?.cta?.bookACall ?? (lang === "es" ? "Agendar llamada" : lang === "da" ? "Book møde" : "Book a call");
+const whatsappLabel = content?.global?.cta?.whatsapp ?? "WhatsApp";
+const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang === "da" ? "Ring" : "Call");
+
+/* ---------------- SEO ---------------- */
+const seo = {
+  ...(content?.seo ?? {}),
+  title,
+  description: subtitle,
+};
+
+/* ---------------- CONTACT standard ---------------- */
+const contactTitle = content?.global?.contact?.title ?? "Contact";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+
+/* Contact form labels */
+const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
+const nameLabel = content?.global?.form?.nameLabel ?? "Name";
+const namePlaceholder = content?.global?.form?.namePlaceholder ?? "Name";
+const emailLabel = content?.global?.form?.emailLabel ?? "Email";
+const emailPlaceholder = content?.global?.form?.emailPlaceholder ?? "Email";
+const messageLabel = content?.global?.form?.messageLabel ?? "Message";
+const messagePlaceholder = content?.global?.form?.messagePlaceholder ?? "Message";
+---
+
+<Layout lang={lang} seo={seo}>
+  <PageHero title={title} subtitle={subtitle} />
+
+  <main>
+    <section class="section">
+      <div class="container cookie-content">
+        <header class="section-header section-header--center">
+          <p class="eyebrow">{sectionEyebrow}</p>
+          <h2 class="h2">{sectionTitle}</h2>
+        </header>
+
+        {sections.map((s: PolicySection) => (
+          <article class="cookie-section">
+            <h3 class="h3">{s.title}</h3>
+            <p class="text">{s.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="contact" class="section section-contact">
+      <div class="container">
+        <header class="section-header section-header--center">
+          <h2 class="h2">{contactTitle}</h2>
+          {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
+        </header>
+
+        <div class="contact-ctas">
+          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
+          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
+          <CTA
+            href={calendlyUrl}
+            variant="icon"
+            label={bookCallLabel}
+            icon="calendar"
+            target={calendlyTarget}
+            rel={calendlyRel}
+          />
+        </div>
+
+        <div class="contact-form-wrap">
+          <ContactForm
+            button={formButton}
+            nameLabel={nameLabel}
+            namePlaceholder={namePlaceholder}
+            emailLabel={emailLabel}
+            emailPlaceholder={emailPlaceholder}
+            messageLabel={messageLabel}
+            messagePlaceholder={messagePlaceholder}
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
