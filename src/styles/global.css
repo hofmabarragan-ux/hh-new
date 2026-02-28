@@ -539,7 +539,7 @@ section {
 
 /* ===================================== */
 /* FOLLOW US (ONLINE STYLE OVERRIDES) */
-/* Used by pages with <FollowUS className="follow-online" /> */
+/* Used by pages with <FollowUs className="follow-online" /> */
 /* ===================================== */
 .follow-online {
   padding-top: 2.25rem;
