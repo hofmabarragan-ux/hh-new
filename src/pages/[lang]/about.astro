@@ -15,7 +15,10 @@ export async function getStaticPaths() {
 type CardItem = { title: string; text: string };
 type TeamMember = { name: string; role: string };
 
-const { lang } = Astro.params as { lang: Lang };
+/** About page only has [lang], no [slug] - use explicit type to avoid "slug is not defined" in build */
+type AboutParams = { lang: Lang };
+const params = Astro.params as AboutParams;
+const lang = params.lang;
 const content = getContent(lang) as any;
 if (!content) throw new Error(`Idioma no soportado: ${lang}`);
 
