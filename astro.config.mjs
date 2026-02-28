@@ -4,6 +4,6 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://hofmanbarragan.com',
+  site: 'https://www.hofmahomes.com',
   integrations: [sitemap()],
 });
