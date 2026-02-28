@@ -21,7 +21,7 @@ const calendlyUrl = CONTACT?.calendlyUrl ?? CONTACT?.calendly ?? "#";
 const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
 
 /* Anchor al contacto estándar (misma página) */
-const contactAnchor = `#contact`;
+const contactAnchor = "#kontakt";
 
 /* CTA labels (local fallbacks) */
 const servicesCtaLabel =
@@ -145,7 +145,7 @@ const newsletterProps = content?.newsletter ?? {
 
 /* CONTACT standard */
 const contactTitle = content?.global?.contact?.title ?? "Contact";
-const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Send us a message and we will get back to you shortly.";
 
 /* Contact form labels */
 const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
@@ -173,12 +173,7 @@ const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whats
       {heroSubtitle ? <p class="hero-subtitle">{heroSubtitle}</p> : null}
 
       <div class="hero-actions">
-        <a
-          class="button-primary"
-          href={calendlyUrl}
-          target={hasCalendly ? "_blank" : undefined}
-          rel={hasCalendly ? "noopener noreferrer" : undefined}
-        >
+        <a class="button-primary" href="#kontakt">
           {primaryCtaLabel}
         </a>
 
@@ -302,30 +297,12 @@ const whatsappHref = CONTACT?.whatsappHref ?? (whatsapp ? `https://wa.me/${whats
   <FollowUs lang={lang} className="follow-online" />
 
   <!-- CONTACT -->
-  <section id="contact" class="section section-contact">
+  <section id="kontakt" class="section section-contact">
     <div class="container">
       <header class="section-header section-header--center">
         <h2 class="h2">{contactTitle}</h2>
         {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
       </header>
-
-      <div class="contact-ctas">
-        <CTA href={phoneHref} variant="icon" label={content?.global?.cta?.call ?? "Call"} icon="phone" />
-        <CTA
-          href={whatsappHref}
-          variant="icon"
-          label={content?.global?.cta?.whatsapp ?? "WhatsApp"}
-          icon="whatsapp"
-        />
-        <CTA
-          href={calendlyUrl}
-          variant="icon"
-          label={content?.global?.cta?.bookACall ?? "Book a call"}
-          icon="calendar"
-          target={hasCalendly ? "_blank" : undefined}
-          rel={hasCalendly ? "noopener noreferrer" : undefined}
-        />
-      </div>
 
       <div class="contact-form-wrap">
         <ContactForm

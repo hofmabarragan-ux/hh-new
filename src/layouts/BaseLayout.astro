@@ -45,6 +45,7 @@ const emailUrl = toMailto((CONTACT as any)?.email ?? "");
 const phoneUrl = toTel((CONTACT as any)?.phone ?? "");
 const whatsappUrl = toWhatsApp((CONTACT as any)?.whatsapp ?? "");
 const calendlyUrl = (CONTACT as any)?.calendlyUrl ?? (CONTACT as any)?.calendly ?? "#";
+const contactAnchor = "#kontakt";
 
 /* REDES (ideal: mover a config más adelante) */
 const social = {
@@ -222,7 +223,7 @@ const hasPhone = Boolean((CONTACT as any)?.phone);
       emailUrl={emailUrl}
       phoneUrl={phoneUrl}
       whatsappUrl={whatsappUrl}
-      calendlyUrl={calendlyUrl}
+      contactAnchor={contactAnchor}
       social={social}
       hasPhone={hasPhone}
       isActive={isActive}
@@ -256,7 +257,7 @@ const hasPhone = Boolean((CONTACT as any)?.phone);
       emailUrl={emailUrl}
       phoneUrl={phoneUrl}
       whatsappUrl={whatsappUrl}
-      calendlyUrl={calendlyUrl}
+      contactAnchor={contactAnchor}
       social={social}
       hasPhone={hasPhone}
     />

@@ -29,7 +29,7 @@ type Props = {
   emailUrl: string;
   phoneUrl: string;
   whatsappUrl: string;
-  calendlyUrl: string;
+  contactAnchor: string;
 
   social: {
     facebook: string;
@@ -65,12 +65,10 @@ const {
   emailUrl,
   phoneUrl,
   whatsappUrl,
-  calendlyUrl,
+  contactAnchor,
   social,
   hasPhone,
 } = Astro.props as Props;
-
-const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
 ---
 
 <footer class="site-footer">
@@ -93,13 +91,7 @@ const hasCalendly = typeof calendlyUrl === "string" && calendlyUrl !== "#";
       </nav>
 
       <div class="footer-cta">
-        {hasCalendly ? (
-          <a href={calendlyUrl} class="button-primary" target="_blank" rel="noopener noreferrer">
-            {navBookCall}
-          </a>
-        ) : (
-          <a href={homeHref + "#contact"} class="button-primary">{navBookCall}</a>
-        )}
+        <a href={contactAnchor} class="button-primary">{navBookCall}</a>
       </div>
     </div>
 

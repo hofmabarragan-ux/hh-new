@@ -94,7 +94,7 @@
 
 @media (max-width: 900px) {
   :root {
-    /* Mobile: raise offset so #contact never sits under sticky header */
+    /* Mobile: raise offset so #kontakt never sits under sticky header */
     --header-offset: 230px;
   }
 }
@@ -770,7 +770,8 @@ section {
 /* ===================================== */
 /* CONTACT anchor offset (sticky header) */
 /* ===================================== */
-#contact {
+#contact,
+#kontakt {
   scroll-margin-top: var(--header-offset);
 }
 
@@ -1120,47 +1121,9 @@ section {
   color: rgba(255, 255, 255, 0.55);
 }
 
-.contact-ctas {
-  margin-top: 1.25rem;
-  display: flex;
-  gap: 0.85rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* Style by element because CTA output may not expose stable classes */
-.contact-ctas a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-
-  padding: 0.8rem 1.05rem;
-  border-radius: var(--radius);
-
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-
-  transition: 0.2s ease;
-  white-space: nowrap;
-}
-
-.contact-ctas a:hover {
-  background: rgba(255, 255, 255, 0.12);
-  opacity: 1;
-}
-
-.contact-ctas a svg {
-  width: 18px;
-  height: 18px;
-}
-
 /* Global helper: used across pages (remove per-page <style> duplicates) */
 .contact-form-wrap {
-  margin-top: 1.75rem;
+  margin-top: 2rem;
 }
 
 /* ===================================== */

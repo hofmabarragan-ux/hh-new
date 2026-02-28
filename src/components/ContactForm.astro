@@ -31,7 +31,7 @@ const {
 ---
 
 <form method="POST" action="#" class="contact-form">
-  <div class="contact-row">
+  <div class="contact-row contact-row--name">
     <label class="sr-only" for="contact-name">{nameLabel}</label>
     <input
       id="contact-name"
@@ -41,29 +41,34 @@ const {
       autocomplete="name"
       required
     />
-
-    <label class="sr-only" for="contact-email">{emailLabel}</label>
-    <input
-      id="contact-email"
-      type="email"
-      name="email"
-      placeholder={emailPlaceholder}
-      autocomplete="email"
-      inputmode="email"
-      required
-    />
   </div>
 
-  <label class="sr-only" for="contact-phone">{phoneLabel}</label>
-  <input
-    id="contact-phone"
-    type="tel"
-    name="phone"
-    placeholder={phonePlaceholder}
-    autocomplete="tel"
-    inputmode="tel"
-    class="contact-phone-input"
-  />
+  <div class="contact-row contact-row--email-phone">
+    <div class="contact-field">
+      <label class="sr-only" for="contact-email">{emailLabel}</label>
+      <input
+        id="contact-email"
+        type="email"
+        name="email"
+        placeholder={emailPlaceholder}
+        autocomplete="email"
+        inputmode="email"
+        required
+      />
+    </div>
+    <div class="contact-field">
+      <label class="sr-only" for="contact-phone">{phoneLabel}</label>
+      <input
+        id="contact-phone"
+        type="tel"
+        name="phone"
+        placeholder={phonePlaceholder}
+        autocomplete="tel"
+        inputmode="tel"
+        class="contact-phone-input"
+      />
+    </div>
+  </div>
 
   <label class="sr-only" for="contact-message">{messageLabel}</label>
   <textarea
@@ -136,14 +141,26 @@ const {
   }
 
   .contact-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.9rem;
     margin-bottom: 0.9rem;
   }
 
+  .contact-row--name {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .contact-row--email-phone {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .contact-field {
+    min-width: 0;
+  }
+
   .contact-phone-input {
-    margin-bottom: 0.9rem;
+    width: 100%;
   }
 
   input,
@@ -204,7 +221,7 @@ const {
   }
 
   @media (max-width: 900px) {
-    .contact-row {
+    .contact-row--email-phone {
       grid-template-columns: 1fr;
     }
   }

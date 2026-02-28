@@ -13,9 +13,9 @@ interface Props {
 
 const { title, text = "", actions } = Astro.props as Props;
 
-const phoneUrl = CONTACT.phone;
+const phoneUrl = CONTACT.phone.startsWith("tel:") ? CONTACT.phone : `tel:${CONTACT.phone}`;
 const whatsappUrl = CONTACT.whatsapp;
-const calendlyUrl = CONTACT.calendly;
+const bookCallHref = "#kontakt";
 
 const hasPhone = Boolean(phoneUrl);
 ---
@@ -52,9 +52,7 @@ const hasPhone = Boolean(phoneUrl);
         <li>
           <a
             class="contact-quick-btn"
-            href={calendlyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={bookCallHref}
             aria-label={actions.bookCall}
           >
             <span class="contact-quick-ico" aria-hidden="true">CAL</span>

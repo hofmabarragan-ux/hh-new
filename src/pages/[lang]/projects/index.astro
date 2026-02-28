@@ -116,7 +116,7 @@ const viewProjectLabel =
 
 /* ---------------- CONTACT standard ---------------- */
 const contactTitle = content?.global?.contact?.title ?? "Contact";
-const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Send us a message and we will get back to you shortly.";
 
 /* Contact form labels */
 const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
@@ -215,30 +215,12 @@ const seo = {
     </section>
 
     <!-- CONTACT (standard + form, shared across pages) -->
-    <section id="contact" class="section section-contact">
+    <section id="kontakt" class="section section-contact">
       <div class="container">
         <header class="section-header section-header--center">
           <h2 class="h2">{contactTitle}</h2>
           {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
         </header>
-
-        <div class="contact-ctas">
-          <CTA href={phoneHref} variant="icon" label={content?.global?.cta?.call ?? "Call"} icon="phone" />
-          <CTA
-            href={whatsappHref}
-            variant="icon"
-            label={content?.global?.cta?.whatsapp ?? "WhatsApp"}
-            icon="whatsapp"
-          />
-          <CTA
-            href={calendlyUrl}
-            variant="icon"
-            label={content?.global?.cta?.bookACall ?? "Book a call"}
-            icon="calendar"
-            target={calendlyTarget}
-            rel={calendlyRel}
-          />
-        </div>
 
         <div class="contact-form-wrap">
           <ContactForm

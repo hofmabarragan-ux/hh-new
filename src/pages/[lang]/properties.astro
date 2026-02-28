@@ -108,7 +108,7 @@ const seo = {
 
 /* ---------------- CONTACT standard ---------------- */
 const contactTitle = content?.global?.contact?.title ?? "Contact";
-const contactSubtitle = content?.global?.contact?.subtitle ?? "Choose the fastest channel. We respond quickly.";
+const contactSubtitle = content?.global?.contact?.subtitle ?? "Send us a message and we will get back to you shortly.";
 
 /* Contact form labels */
 const formButton = content?.global?.form?.button ?? content?.global?.form?.submit ?? "Send message";
@@ -171,7 +171,7 @@ const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang
 
         <!-- CTAs (en contenido, no en hero) -->
         <div class="cta-row" style="margin-top: 1.5rem;">
-          <CTA label={bookCallLabel} href={calendlyUrl} target={calendlyTarget} rel={calendlyRel} />
+          <CTA label={bookCallLabel} href="#kontakt" />
           <CTA label={whatsappLabel} href={whatsappHref} />
           <CTA label={callLabel} href={phoneHref} />
         </div>
@@ -179,25 +179,12 @@ const callLabel = content?.global?.cta?.call ?? (lang === "es" ? "Llamar" : lang
     </section>
 
     <!-- CONTACT (standard + form, shared across pages) -->
-    <section id="contact" class="section section-contact">
+    <section id="kontakt" class="section section-contact">
       <div class="container">
         <header class="section-header section-header--center">
           <h2 class="h2">{contactTitle}</h2>
           {contactSubtitle ? <p class="lead">{contactSubtitle}</p> : null}
         </header>
-
-        <div class="contact-ctas">
-          <CTA href={phoneHref} variant="icon" label={callLabel} icon="phone" />
-          <CTA href={whatsappHref} variant="icon" label={whatsappLabel} icon="whatsapp" />
-          <CTA
-            href={calendlyUrl}
-            variant="icon"
-            label={bookCallLabel}
-            icon="calendar"
-            target={calendlyTarget}
-            rel={calendlyRel}
-          />
-        </div>
 
         <div class="contact-form-wrap">
           <ContactForm

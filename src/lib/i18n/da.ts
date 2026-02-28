@@ -34,7 +34,7 @@ const da = {
   global: {
     contact: {
       title: "Kontakt",
-      subtitle: "Vælg den hurtigste kanal. Vi svarer hurtigt.",
+      subtitle: "Send os en besked, og vi vender straks tilbage.",
     },
     cta: {
       call: "Ring",

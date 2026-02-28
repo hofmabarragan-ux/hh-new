@@ -25,7 +25,7 @@ type Props = {
   emailUrl: string;
   phoneUrl: string;
   whatsappUrl: string;
-  calendlyUrl: string;
+  contactAnchor: string;
 
   social: {
     facebook: string;
@@ -57,7 +57,7 @@ const {
   emailUrl,
   phoneUrl,
   whatsappUrl,
-  calendlyUrl,
+  contactAnchor,
   social,
   hasPhone,
   isActive,
@@ -145,7 +145,7 @@ const {
         </div>
 
         <!-- CTA (desktop row 1) -->
-        <a href={calendlyUrl} class="button-primary header-cta">
+        <a href={contactAnchor} class="button-primary header-cta">
           {navBookCall}
         </a>
 
@@ -197,7 +197,7 @@ const {
         </div>
 
         <!-- CTA (mobile row 2) -->
-        <a href={calendlyUrl} class="button-primary header-cta bottom-cta">
+        <a href={contactAnchor} class="button-primary header-cta bottom-cta">
           {navBookCall}
         </a>
       </div>

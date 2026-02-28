@@ -35,7 +35,7 @@ const en = {
   global: {
     contact: {
       title: "Contact",
-      subtitle: "Choose the fastest channel. We respond quickly.",
+      subtitle: "Send us a message and we will get back to you shortly.",
     },
     cta: {
       call: "Call",
