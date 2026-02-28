@@ -4,6 +4,6 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://hofmanbarragan.com', // Sørg for at dette matcher dit live domæne
+  site: 'https://hofmanbarragan.com',
   integrations: [sitemap()],
 });
