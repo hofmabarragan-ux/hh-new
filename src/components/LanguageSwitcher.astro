@@ -4,7 +4,14 @@ import { languages, type Lang } from "../lib/i18n";
 const DEFAULT_LANG: Lang = "da";
 const supported = languages as readonly string[];
 
-const flagSrc = (l: string) => `/images/flags/${l}.svg`;
+// Vi bytter fil-stien ud med emojis
+const flagEmoji = (l: string) => {
+  if (l === "da") return "🇩🇰";
+  if (l === "en") return "🇬🇧";
+  if (l === "es") return "🇪🇸";
+  return "🌐";
+};
+
 const flagLabel = (l: string) =>
   l === "da" ? "Dansk" : l === "en" ? "English" : "Español";
 ---
@@ -16,20 +23,15 @@ const flagLabel = (l: string) =>
 >
   {supported.map((l) => (
     <a
-      class="flag-link"
       href={`/${l}`}
       data-lang={l}
       aria-label={flagLabel(l)}
       lang={l}
+      style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin: 0 6px;"
     >
-      <img
-        class="flag"
-        src={flagSrc(l)}
-        alt={flagLabel(l)}
-        width="28"
-        height="20"
-        loading="lazy"
-      />
+      <span class="flag" style="font-size: 24px; line-height: 1; transition: transform 0.2s ease;">
+        {flagEmoji(l)}
+      </span>
     </a>
   ))}
 </div>
@@ -73,9 +75,15 @@ const flagLabel = (l: string) =>
     if (l === currentLang) {
       a.classList.add("active");
       a.setAttribute("aria-current", "true");
+      // Gør det aktive flag en smule større
+      a.style.opacity = "1";
+      a.style.transform = "scale(1.15)";
     } else {
       a.classList.remove("active");
       a.removeAttribute("aria-current");
+      // Dæmp de inaktive flag en smule
+      a.style.opacity = "0.5";
+      a.style.transform = "scale(1)";
     }
   });
 })();

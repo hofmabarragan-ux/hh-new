@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import 'vanilla-cookieconsent/dist/cookieconsent.css';
 import { getContent, languages, type Lang } from "../lib/i18n";
 import { SITE, CONTACT } from "../config/site";
 
@@ -155,7 +156,6 @@ const hasPhone = Boolean((CONTACT as any)?.phone);
     ))}
     <link rel="alternate" hreflang="x-default" href={xDefaultHref} />
 
-    <!-- Make in-page anchor offsets more reliable across browsers (esp. mobile) -->
     <style>
       html {
         scroll-padding-top: var(--header-offset, 170px);
@@ -173,9 +173,36 @@ const hasPhone = Boolean((CONTACT as any)?.phone);
         z-index: 1;
       }
     </style>
+
+    <script is:inline>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied',
+            'wait_for_update': 500
+        });
+    </script>
+
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-YFKPEMK5P6"></script>
+    <script is:inline>
+        window.gtag('js', new Date());
+        window.gtag('config', 'G-YFKPEMK5P6');
+    </script>
+
+    <script is:inline>
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1804415716822882');
+    </script>
   </head>
 
   <body>
+    <noscript>
+      <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1804415716822882&ev=PageView&noscript=1" alt="" />
+    </noscript>
+
     <Header
       lang={lang}
       homeHref={homeHref}
@@ -233,5 +260,130 @@ const hasPhone = Boolean((CONTACT as any)?.phone);
       social={social}
       hasPhone={hasPhone}
     />
+
+    <script>
+      import * as CookieConsent from 'vanilla-cookieconsent';
+
+      const GTM_ID = 'GTM-M86ZTP8G';
+
+      let trackingLoaded = false;
+
+      function loadTrackingScripts() {
+        if (trackingLoaded) return;
+        trackingLoaded = true;
+        (window.dataLayer = window.dataLayer || []).push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        const gtm = document.createElement('script');
+        gtm.async = true;
+        gtm.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`;
+        document.head.appendChild(gtm);
+      }
+
+      function onAccept(param) {
+        const hasAnalytics = param?.cookie?.categories?.includes('analytics') ?? CookieConsent.acceptedCategory('analytics');
+        if (!hasAnalytics) return;
+        
+        window.gtag = window.gtag || function () { (window.dataLayer = window.dataLayer || []).push(arguments); };
+        window.gtag('consent', 'update', {
+          'ad_storage': 'granted',
+          'ad_user_data': 'granted',
+          'ad_personalization': 'granted',
+          'analytics_storage': 'granted'
+        });
+        
+        if (typeof window.fbq === 'function') {
+          window.fbq('track', 'PageView');
+        }
+        loadTrackingScripts();
+      }
+
+      CookieConsent.run({
+        mode: 'opt-in',
+        cookie: { name: 'cc_cookie', useLocalStorage: false },
+        guiOptions: {
+          consentModal: { layout: 'cloud inline', position: 'bottom center', equalWeightButtons: true },
+          preferencesModal: { layout: 'box', equalWeightButtons: true }
+        },
+        onConsent: onAccept,
+        categories: {
+          necessary: { enabled: true, readOnly: true },
+          analytics: { enabled: false }
+        },
+        language: {
+          default: 'da',
+          autoDetect: 'document',
+          translations: {
+            da: {
+              consentModal: {
+                title: 'Vi bruger cookies',
+                description: 'Vi bruger cookies til at forbedre din oplevelse og måle trafik. Du kan acceptere alle eller kun nødvendige cookies.',
+                acceptAllBtn: 'Accepter alle',
+                acceptNecessaryBtn: 'Kun nødvendige',
+                showPreferencesBtn: 'Indstillinger'
+              },
+              preferencesModal: {
+                title: 'Cookie-indstillinger',
+                acceptAllBtn: 'Accepter alle',
+                acceptNecessaryBtn: 'Kun nødvendige',
+                savePreferencesBtn: 'Gem',
+                closeIconLabel: 'Luk',
+                sections: [
+                  { title: 'Cookiebrug', description: 'Vi bruger cookies til analyse og marketing. Du kan vælge hvilke kategorier du accepterer.' },
+                  { title: 'Nødvendige', description: 'Disse cookies er nødvendige for at sitet fungerer.', linkedCategory: 'necessary' },
+                  { title: 'Analytics og marketing', description: 'Google Analytics, Meta Pixel og lignende for at forstå trafik og vise relevante annoncer.', linkedCategory: 'analytics' }
+                ]
+              }
+            },
+            en: {
+              consentModal: {
+                title: 'We use cookies',
+                description: 'We use cookies to improve your experience and measure traffic. You can accept all or only necessary cookies.',
+                acceptAllBtn: 'Accept all',
+                acceptNecessaryBtn: 'Necessary only',
+                showPreferencesBtn: 'Preferences'
+              },
+              preferencesModal: {
+                title: 'Cookie preferences',
+                acceptAllBtn: 'Accept all',
+                acceptNecessaryBtn: 'Necessary only',
+                savePreferencesBtn: 'Save',
+                closeIconLabel: 'Close',
+                sections: [
+                  { title: 'Cookie usage', description: 'We use cookies for analytics and marketing. You can choose which categories to accept.' },
+                  { title: 'Necessary', description: 'These cookies are required for the site to work.', linkedCategory: 'necessary' },
+                  { title: 'Analytics and marketing', description: 'Google Analytics, Meta Pixel and similar to understand traffic and show relevant ads.', linkedCategory: 'analytics' }
+                ]
+              }
+            }
+          }
+        }
+      });
+    </script>
+    <style is:global>
+      #cc-main {
+        --cc-bg: #121212;
+        --cc-primary-color: #F5F5F3;
+        --cc-secondary-color: rgba(245, 245, 243, 0.75);
+        
+        /* Knapfarver henter nu farven direkte fra jeres egne variabler */
+        --cc-btn-primary-bg: var(--blue-deep);
+        --cc-btn-primary-color: var(--white);
+        --cc-btn-primary-border-color: var(--blue-deep);
+        --cc-btn-primary-hover-bg: var(--blue-deep);
+        --cc-btn-primary-hover-color: var(--white);
+        --cc-btn-primary-hover-border-color: var(--blue-deep);
+        
+        /* Sekundær knap (Kun nødvendige) */
+        --cc-btn-secondary-bg: transparent;
+        --cc-btn-secondary-color: #F5F5F3;
+        --cc-btn-secondary-border-color: var(--blue-deep);
+        --cc-btn-secondary-hover-bg: rgba(245, 245, 243, 0.08);
+        --cc-btn-secondary-hover-color: #F5F5F3;
+        --cc-btn-secondary-hover-border-color: var(--blue-deep);
+        
+        --cc-separator-border-color: rgba(245, 245, 243, 0.12);
+        --cc-modal-border-radius: 0.25rem;
+        --cc-font-family: inherit;
+      }
+    </style>
   </body>
 </html>
