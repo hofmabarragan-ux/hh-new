@@ -1,24 +1,30 @@
 ---
 interface Props {
   button?: string;
+  sendingLabel?: string;
+  successMessage?: string;
 
   /* i18n placeholders / labels (opcionales) */
   nameLabel?: string;
   namePlaceholder?: string;
-
   emailLabel?: string;
   emailPlaceholder?: string;
-
+  phoneLabel?: string;
+  phonePlaceholder?: string;
   messageLabel?: string;
   messagePlaceholder?: string;
 }
 
 const {
   button = "Send message",
+  sendingLabel = "Sender...",
+  successMessage = "Tak! Din besked er sendt.",
   nameLabel = "Name",
   namePlaceholder = "Name",
   emailLabel = "Email",
   emailPlaceholder = "Email",
+  phoneLabel = "Telefon",
+  phonePlaceholder = "Telefon",
   messageLabel = "Message",
   messagePlaceholder = "Message",
 } = Astro.props as Props;
@@ -48,6 +54,17 @@ const {
     />
   </div>
 
+  <label class="sr-only" for="contact-phone">{phoneLabel}</label>
+  <input
+    id="contact-phone"
+    type="tel"
+    name="phone"
+    placeholder={phonePlaceholder}
+    autocomplete="tel"
+    inputmode="tel"
+    class="contact-phone-input"
+  />
+
   <label class="sr-only" for="contact-message">{messageLabel}</label>
   <textarea
     id="contact-message"
@@ -58,9 +75,53 @@ const {
   ></textarea>
 
   <div class="contact-actions">
-    <button class="button-primary" type="submit">{button}</button>
+    <button class="button-primary" type="submit" id="contact-submit-btn">{button}</button>
+    <p class="contact-status" id="contact-status" aria-live="polite"></p>
   </div>
 </form>
+
+<script define:vars={{ scriptUrl: import.meta.env.PUBLIC_GOOGLE_SCRIPT_URL, sendingText: sendingLabel, successText: successMessage, buttonText: button }}>
+  const form = document.querySelector('.contact-form');
+  const btn = document.getElementById('contact-submit-btn');
+  const statusEl = document.getElementById('contact-status');
+
+  if (form && btn && statusEl && scriptUrl) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = sendingText;
+      statusEl.textContent = '';
+      statusEl.className = 'contact-status';
+
+      const formData = {
+        type: 'contact',
+        name: form.querySelector('[name="name"]')?.value ?? '',
+        email: form.querySelector('[name="email"]')?.value ?? '',
+        phone: form.querySelector('[name="phone"]')?.value ?? '',
+        message: form.querySelector('[name="message"]')?.value ?? '',
+      };
+
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(formData),
+        });
+        // Med no-cors er svaret 'opaque' – vi kan ikke læse body. Antager succes hvis fetch gennemføres.
+        statusEl.textContent = successText;
+        statusEl.className = 'contact-status success';
+        form.reset();
+      } catch (err) {
+        statusEl.textContent = 'Der opstod en fejl. Prøv venligst igen.';
+        statusEl.className = 'contact-status error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = buttonText;
+      }
+    });
+  }
+</script>
 
 <style>
   /* Form-only styles: no section background, no container, no heading */
@@ -81,6 +142,10 @@ const {
     margin-bottom: 0.9rem;
   }
 
+  .contact-phone-input {
+    margin-bottom: 0.9rem;
+  }
+
   input,
   textarea {
     width: 100%;
@@ -90,11 +155,15 @@ const {
     background: rgba(0, 0, 0, 0.15);
     color: rgba(255, 255, 255, 0.92);
     outline: none;
+    font-family: inherit;
+    font-size: 1rem;
   }
 
   input::placeholder,
   textarea::placeholder {
     color: rgba(255, 255, 255, 0.45);
+    font-family: inherit;
+    font-size: inherit;
   }
 
   textarea {
@@ -104,8 +173,21 @@ const {
 
   .contact-actions {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 1rem;
+  }
+
+  .contact-status {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .contact-status.success {
+    color: #4ade80;
+  }
+  .contact-status.error {
+    color: #f87171;
   }
 
   /* Accessibility */
